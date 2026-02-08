@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#059669">
+<title>Mi Dieta TM7</title>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+<style>
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f0fdf4; overscroll-behavior: none; }
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+.fade-in { animation: fadeIn 0.3s ease-in; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+.recipe-card { transition: all 0.2s ease; }
+.recipe-card:active { transform: scale(0.98); }
+.badge { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 9999px; font-size: 0.7rem; font-weight: 600; }
+.tab-active { color: #059669; border-top: 3px solid #059669; }
+.tab-inactive { color: #6b7280; border-top: 3px solid transparent; }
+.meal-card { border-left: 4px solid; }
+.pulse { animation: pulse 2s infinite; }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script>const DB = {"meta": {"version": "2.0", "description": "Base de datos de dieta Cronobiología Nutricional + Thermomix TM7", "lastUpdated": "2026-02-07", "totalRecipes": 55}, "dietRules": {"principle": "Cronobiología Nutricional - distribución de diferentes tipos de alimentos a lo largo del día para optimizar los relojes biológicos. Control de peso, mejor descanso, control endocrino, disminución de ansiedad.", "mealsPerDay": 5, "meals": {"desayuno": {"timeRange": "07:00-09:00", "rules": "Café solo o infusión, o café con leche desnatada y edulcorante. Acompañado de 1-2 tostadas de pan integral con aceite de oliva. Se puede añadir jamón serrano, cocido, queso desnatado (no cremoso), o mermelada sin azúcar. También atún al natural. NO cereales, NO fruta, NO zumos.", "thermomixTip": "El desayuno no requiere Thermomix. Preparación directa."}, "almuerzo": {"timeRange": "11:00-12:00", "rules": "Solo si pasan 5+ horas entre desayuno y comida. Unas rebanadas de pan con jamón, sardinillas, tortilla francesa, queso fresco. O una pieza de fruta mediana.", "thermomixTip": "Se puede usar TM7 para hacer una tortilla francesa rápida."}, "comida": {"timeRange": "13:00-15:00", "rules": "Dos platos: 1º verdura o ensalada + 2º proteína animal (carne roja magra, huevos, pescado, pollo, pavo, conejo, cerdo). La verdura al vapor, hervida o al horno, sin patata ni zanahoria. Aliñar con aceite de oliva, vinagre o limón. El segundo plato sin aceite, al horno o plancha. NO pan NI fruta en esta comida. Una vez/semana se puede comer legumbre con verduras. Se puede comer arroz o pasta un día/semana (reducir).", "thermomixTip": "TRUCO ESTRELLA: Hacer una crema de verduras en el vaso (las verduras quedan 'escondidas') mientras la proteína se cocina arriba en el Varoma. Dos platos en una sola preparación en 30 minutos."}, "merienda": {"timeRange": "antes de 18:00", "rules": "Momento de la fruta. Opciones: 1 naranja, 1 melocotón, 1 pera, 1 plátano pequeño, 2 rodajas piña, 2 mandarinas, 2 kiwis, 2 higos, 3 albaricoques, 200g fresas/frambuesas/grosellas, 200g melón/sandía, 100g cerezas/uvas, 1 manzana. En épocas de ansiedad: 1 onza chocolate negro 60%+.", "thermomixTip": "No requiere Thermomix."}, "cena": {"timeRange": "antes de 21:00", "rules": "Proteína animal: pescado, marisco, crustáceos, huevos o aves. Acompañar con verduras: calabacín, espárragos, setas, champiñones, tomate, pimientos, puerros, pepino. Evitar exceso de hoja verde. Pescado azul 2 veces/semana. NUNCA cereales, legumbres, arroz, pasta ni patata. No fruta después de cenar.", "thermomixTip": "Ideal para Varoma: pescado o marisco al vapor con verduras. Rápido y limpio."}}, "oilLimit": "3 cucharadas soperas al día, preferentemente en crudo. En cocción no superar 120°C.", "waterIntake": "1-2 litros de agua al día, baja mineralización", "prohibited": ["dulces de todo tipo", "bollería industrial", "azúcar", "salsas artificiales", "harina", "refrescos (excepto zero/light)", "productos dietéticos con fibra"], "alcoholLimit": "Máximo 2 copitas de vino o 1 cerveza al día. Mejor evitar temporalmente para bajar peso.", "snacksAllowed": ["pepinillos (sin azúcar añadido)", "cebolletas (sin azúcar añadido)"]}, "foodCategories": {"proteins": {"poultry": ["Pechuga de pollo", "Muslo de pollo deshuesado", "Pechuga de pavo", "Hamburguesa de pollo/pavo"], "meat": ["Filete de ternera", "Entrecot", "Solomillo de cerdo", "Lomo de cerdo", "Chuletillas de cordero", "Conejo"], "fish": ["Merluza", "Salmón", "Lubina", "Bacalao", "Bonito", "Rodaballo", "Sardinas", "Atún al natural (lata)"], "seafood": ["Gambas", "Langostinos", "Mejillones", "Sepia", "Calamares", "Pulpo", "Navajas", "Berberechos", "Almejas"], "eggs": ["Huevos (tortilla francesa, duros, revueltos)"]}, "vegetables": {"forCreams": ["Calabacín", "Brócoli", "Espárragos", "Champiñones", "Pimientos rojos", "Calabaza", "Coliflor", "Tomate", "Puerro"], "forSauteing": ["Calabacín", "Espárragos trigueros", "Champiñones", "Setas", "Pimientos", "Berenjena", "Espinacas", "Brócoli"], "forSalad": ["Lechuga", "Tomate", "Cebolla", "Pepino", "Brotes verdes", "Escarola", "Endivias", "Aceitunas (6 máx)"], "note": "IMPORTANTE: Las verduras siempre se preparan de forma apetecible. Nunca hervidas sin más. Siempre en crema con especias, salteadas con sabores intensos, o en ensalada."}, "fruits": {"allowed": [{"name": "Naranja", "portion": "1"}, {"name": "Melocotón", "portion": "1"}, {"name": "Pera", "portion": "1"}, {"name": "Manzana", "portion": "1"}, {"name": "Plátano pequeño", "portion": "1"}, {"name": "Piña fresca", "portion": "2 rodajas"}, {"name": "Mandarina", "portion": "2"}, {"name": "Kiwi", "portion": "2"}, {"name": "Higos", "portion": "2"}, {"name": "Albaricoques", "portion": "3"}, {"name": "Fresas", "portion": "200g"}, {"name": "Frambuesas", "portion": "200g"}, {"name": "Melón", "portion": "200g"}, {"name": "Sandía", "portion": "200g"}, {"name": "Cerezas", "portion": "100g"}, {"name": "Uvas", "portion": "100g"}]}}, "recipes": [{"id": "crema_calabacin_curry", "name": "Crema de calabacín al curry", "category": "comida_primero", "mealTypes": ["comida"], "prepTime": 5, "cookTime": 25, "totalTime": 30, "servings": 4, "difficulty": "fácil", "thermomix": true, "ingredients": [{"item": "calabacín", "quantity": "600g (3 medianos)"}, {"item": "cebolla", "quantity": "1 pequeña"}, {"item": "curry en polvo", "quantity": "1 cucharadita"}, {"item": "aceite de oliva", "quantity": "1 cucharada"}, {"item": "agua o caldo de verduras", "quantity": "400ml"}, {"item": "sal y pimienta", "quantity": "al gusto"}], "thermomixSteps": ["Trocear la cebolla y echar en el vaso. Programar 5 seg/vel 5.", "Añadir el aceite y el curry. Programar 5 min/120°C/vel 1.", "Añadir el calabacín troceado (no hace falta pelar), el agua y la sal. Programar 20 min/100°C/vel 1.", "Triturar progresivamente 1 min subiendo de vel 5 a vel 10.", "Rectificar de sal. Servir caliente."], "tags": ["crema", "calabacín", "curry", "verdura escondida", "rápido"], "calories_approx": 80, "vegetableHidden": true, "cookidooSearchTerms": ["crema calabacín curry", "crema calabacín especiada"], "tip": "El curry le da un sabor intenso que hace que ni notes el calabacín. Puedes añadir una pizca de jengibre en polvo para más sabor."}, {"id": "crema_brocoli_pimenton", "name": "Crema de brócoli con pimentón ahumado", "category": "comida_primero", "mealTypes": ["comida"], "prepTime": 5, "cookTime": 22, "totalTime": 27, "servings": 4, "difficulty": "fácil", "thermomix": true, "ingredients": [{"item": "brócoli", "quantity": "500g"}, {"item": "cebolla", "quantity": "1 pequeña"}, {"item": "pimentón ahumado de la Vera", "quantity": "1 cucharadita"}, {"item": "aceite de oliva", "quantity": "1 cucharada"}, {"item": "agua", "quantity": "400ml"}, {"item": "sal", "quantity": "al gusto"}], "thermomixSteps": ["Trocear cebolla en el vaso. 5 seg/vel 5.", "Añadir aceite y pimentón. 4 min/120°C/vel 1.", "Añadir brócoli en ramilletes y agua. 18 min/100°C/vel 1.", "Triturar 1 min de vel 5 a vel 10 progresivamente.", "Servir con un hilito de aceite de oliva crudo por encima."], "tags": ["crema", "brócoli", "pimentón", "ahumado", "verdura escondida"], "calories_approx": 75, "vegetableHidden": true, "cookidooSearchTerms": ["crema brócoli", "crema brécol"], "tip": "El pimentón ahumado de la Vera transforma completamente el sabor del brócoli. No te lo vas a creer."}, {"id": "crema_esparragos_ajo", "name": "Crema de espárragos con ajo confitado", "category": "comida_primero", "mealTypes": ["comida"], "prepTime": 5, "cookTime": 25, "totalTime": 30, "servings": 4, "difficulty": "fácil", "thermomix": true, "ingredients": [{"item": "espárragos verdes", "quantity": "500g"}, {"item": "ajos", "quantity": "4 dientes"}, {"item": "aceite de oliva", "quantity": "1 cucharada"}, {"item": "agua", "quantity": "400ml"}, {"item": "sal y pimienta", "quantity": "al gusto"}], "thermomixSteps": ["Echar los ajos pelados y el aceite en el vaso. 8 min/120°C/vel 1 (se confitan).", "Añadir espárragos troceados (reservar las puntas), agua y sal. 17 min/100°C/vel 1.", "Triturar 1 min/vel 5 a vel 10.", "Mientras, las puntas de espárrago se pueden hacer en una sartén 2 min para decorar."], "tags": ["crema", "espárragos", "ajo", "confitado", "verdura escondida"], "calories_approx": 70, "vegetableHidden": true, "cookidooSearchTerms": ["crema espárragos", "crema espárragos verdes"], "tip": "El ajo confitado a baja temperatura queda dulce y suave, perfecto para darle cuerpo a la crema."}, {"id": "crema_champinones_tomillo", "name": "Crema de champiñones con tomillo", "category": "comida_primero", "mealTypes": ["comida"], "prepTime": 5, "cookTime": 20, "totalTime": 25, "servings": 4, "difficulty": "fácil", "thermomix": true, "ingredients": [{"item": "champiñones", "quantity": "400g"}, {"item": "cebolla", "quantity": "1 pequeña"}, {"item": "tomillo seco", "quantity": "1 cucharadita"}, {"item": "aceite de oliva", "quantity": "1 cucharada"}, {"item": "agua o caldo", "quantity": "300ml"}, {"item": "sal y pimienta negra", "quantity": "al gusto"}], "thermomixSteps": ["Trocear cebolla. 5 seg/vel 5.", "Añadir aceite y tomillo. 5 min/120°C/vel 1.", "Añadir champiñones laminados, agua y sal. 15 min/100°C/vel 1.", "Triturar 1 min/vel 5 a vel 10.", "Un toque de pimienta negra recién molida al servir."], "tags": ["crema", "champiñones", "setas", "tomillo", "verdura escondida"], "calories_approx": 65, "vegetableHidden": true, "cookidooSearchTerms": ["crema champiñones", "crema setas"], "tip": "Si encuentras setas de temporada (boletus, etc.), mezcla con los champiñones para un sabor brutal."}, {"id": "crema_pimientos_asados", "name": "Crema de pimientos rojos asados", "category": "comida_primero", "mealTypes": ["comida"], "prepTime": 5, "cookTime": 25, "totalTime": 30, "servings": 4, "difficulty": "fácil", "thermomix": true, "ingredients": [{"item": "pimientos rojos", "quantity": "4 grandes (o 1 bote de pimientos asados)"}, {"item": "cebolla", "quantity": "1 pequeña"}, {"item": "ajo", "quantity": "2 dientes"}, {"item": "aceite de oliva", "quantity": "1 cucharada"}, {"item": "agua o caldo", "quantity": "300ml"}, {"item": "sal", "quantity": "al gusto"}, {"item": "comino (opcional)", "quantity": "una pizca"}], "thermomixSteps": ["Trocear cebolla y ajo. 5 seg/vel 5.", "Añadir aceite. 5 min/120°C/vel 1.", "Añadir pimientos troceados (si son de bote, escurrirlos), agua y sal. 15 min/100°C/vel 1.", "Triturar 1 min/vel 5 a vel 10.", "Añadir una pizca de comino si te gusta."], "tags": ["crema", "pimientos", "asados", "verdura escondida"], "calories_approx": 60, "vegetableHidden": true, "cookidooSearchTerms": ["crema pimientos rojos", "crema pimiento asado"], "tip": "Usando pimientos de bote (asados) ahorras mucho tiempo y el resultado es igual de bueno."}, {"id": "crema_calabaza_especiada", "name": "Crema de calabaza especiada", "category": "comida_primero", "mealTypes": ["comida"], "prepTime": 10, "cookTime": 25, "totalTime": 35, "servings": 4, "difficulty": "fácil", "thermomix": true, "ingredients": [{"item": "calabaza", "quantity": "600g"}, {"item": "cebolla", "quantity": "1"}, {"item": "jengibre fresco rallado", "quantity": "1 cucharadita"}, {"item": "curry", "quantity": "1/2 cucharadita"}, {"item": "nuez moscada", "quantity": "una pizca"}, {"item": "aceite de oliva", "quantity": "1 cucharada"}, {"item": "agua", "quantity": "400ml"}, {"item": "sal", "quantity": "al gusto"}], "thermomixSteps": ["Trocear cebolla. 5 seg/vel 5.", "Añadir aceite, jengibre, curry y nuez moscada. 5 min/120°C/vel 1.", "Añadir calabaza pelada y troceada, agua y sal. 20 min/100°C/vel 1.", "Triturar 1 min/vel 5 a vel 10 hasta que quede muy fina."], "tags": ["crema", "calabaza", "especiada", "jengibre", "verdura escondida"], "calories_approx": 85, "vegetableHidden": true, "cookidooSearchTerms": ["crema calabaza", "crema calabaza especias"], "tip": "La calabaza queda naturalmente dulce y cremosa. Con las especias es adictiva."}, {"id": "crema_coliflor_nuez", "name": "Crema de coliflor con nuez moscada", "category": "comida_primero", "mealTypes": ["comida"], "prepTime": 5, "cookTime": 22, "totalTime": 27, "servings": 4, "difficulty": "fácil", "thermomix": true, "ingredients": [{"item": "coliflor", "quantity": "500g"}, {"item": "cebolla", "quantity": "1 pequeña"}, {"item": "nuez moscada", "quantity": "1/4 cucharadita"}, {"item": "aceite de oliva", "quantity": "1 cucharada"}, {"item": "agua", "quantity": "400ml"}, {"item": "sal y pimienta blanca", "quantity": "al gusto"}], "thermomixSteps": ["Trocear cebolla. 5 seg/vel 5.", "Añadir aceite. 5 min/120°C/vel 1.", "Añadir coliflor en ramilletes, agua, nuez moscada y sal. 17 min/100°C/vel 1.", "Triturar 1 min/vel 5 a vel 10. Queda super cremosa."], "tags": ["crema", "coliflor", "nuez moscada", "verdura escondida"], "calories_approx": 70, "vegetableHidden": true, "cookidooSearchTerms": ["crema coliflor", "puré coliflor"], "tip": "La coliflor triturada tiene textura de puré de patata pero sin calorías. La nuez moscada es clave."}, {"id": "crema_tomate_albahaca", "name": "Crema de tomate con albahaca", "category": "comida_primero", "mealTypes": ["comida"], "prepTime": 5, "cookTime": 20, "totalTime": 25, "servings": 4, "difficulty": "muy fácil", "thermomix": true, "ingredients": [{"item": "tomates maduros", "quantity": "600g (o 1 lata tomate triturado)"}, {"item": "cebolla", "quantity": "1 pequeña"}, {"item": "ajo", "quantity": "1 diente"}, {"item": "albahaca seca (o fresca)", "quantity": "1 cucharadita"}, {"item": "aceite de oliva", "quantity": "1 cucharada"}, {"item": "agua", "quantity": "100ml"}, {"item": "sal y pimienta", "quantity": "al gusto"}], "thermomixSteps": ["Trocear cebolla y ajo. 5 seg/vel 5.", "Añadir aceite. 5 min/120°C/vel 1.", "Añadir tomate troceado, agua, albahaca y sal. 15 min/100°C/vel 1.", "Triturar 30 seg/vel 7."], "tags": ["crema", "tomate", "albahaca", "mediterráneo", "verdura escondida"], "calories_approx": 65, "vegetableHidden": true, "cookidooSearchTerms": ["crema tomate", "sopa tomate albahaca"], "tip": "Si usas tomate de lata, el resultado es igual de bueno y ahorras tiempo."}, {"id": "crema_puerro_ligera", "name": "Crema de puerro ligera", "category": "comida_primero", "mealTypes": ["comida"], "prepTime": 5, "cookTime": 22, "totalTime": 27, "servings": 4, "difficulty": "fácil", "thermomix": true, "ingredients": [{"item": "puerros", "quantity": "3 (parte blanca y verde clarito)"}, {"item": "calabacín", "quantity": "1 pequeño"}, {"item": "nuez moscada", "quantity": "una pizca"}, {"item": "aceite de oliva", "quantity": "1 cucharada"}, {"item": "agua", "quantity": "400ml"}, {"item": "sal", "quantity": "al gusto"}], "thermomixSteps": ["Trocear puerros y echar al vaso. 5 seg/vel 5.", "Añadir aceite. 5 min/120°C/vel 1.", "Añadir calabacín troceado, agua, nuez moscada y sal. 17 min/100°C/vel 1.", "Triturar 1 min/vel 5 a vel 10."], "tags": ["crema", "puerro", "ligera", "verdura escondida"], "calories_approx": 75, "vegetableHidden": true, "cookidooSearchTerms": ["crema puerro", "vichyssoise ligera"], "tip": "El calabacín le da cremosidad extra sin necesidad de patata. Queda sedosa."}, {"id": "sopa_thai_verduras", "name": "Sopa thai de verduras con jengibre y lima", "category": "comida_primero", "mealTypes": ["comida"], "prepTime": 10, "cookTime": 20, "totalTime": 30, "servings": 4, "difficulty": "fácil", "thermomix": true, "ingredients": [{"item": "calabacín", "quantity": "1"}, {"item": "champiñones", "quantity": "150g"}, {"item": "pimiento rojo", "quantity": "1"}, {"item": "jengibre fresco", "quantity": "2 cm (rallado)"}, {"item": "ajo", "quantity": "2 dientes"}, {"item": "salsa de soja", "quantity": "1 cucharada"}, {"item": "zumo de lima o limón", "quantity": "de 1 lima"}, {"item": "aceite de oliva", "quantity": "1 cucharada"}, {"item": "agua o caldo", "quantity": "500ml"}, {"item": "sal", "quantity": "al gusto"}], "thermomixSteps": ["Picar ajo y jengibre. 5 seg/vel 7.", "Añadir aceite. 3 min/120°C/vel 1.", "Añadir todas las verduras troceadas finas, el agua y la soja. 17 min/100°C/vel 1/giro inverso (para que no se troceen más).", "Añadir zumo de lima al servir. No triturar, queda como sopa con trocitos."], "tags": ["sopa", "thai", "asiático", "jengibre", "lima", "verdura escondida"], "calories_approx": 90, "vegetableHidden": false, "cookidooSearchTerms": ["sopa thai", "sopa jengibre", "sopa asiática"], "tip": "El jengibre y la lima le dan un sabor tan potente que las verduras pasan a segundo plano. Si quieres, tritura la mitad para que quede más cremosa."}, {"id": "calabacin_dorado_ajo", "name": "Calabacín dorado con ajo y pimentón", "category": "comida_primero", "mealTypes": ["comida", "cena"], "prepTime": 5, "cookTime": 12, "totalTime": 17, "servings": 2, "difficulty": "muy fácil", "thermomix": true, "ingredients": [{"item": "calabacín", "quantity": "2 medianos"}, {"item": "ajo", "quantity": "2 dientes"}, {"item": "pimentón ahumado", "quantity": "1/2 cucharadita"}, {"item": "aceite de oliva", "quantity": "1 cucharada"}, {"item": "sal", "quantity": "al gusto"}], "thermomixSteps": ["Cortar calabacín en medias lunas gruesas (1 cm). Laminar los ajos.", "Echar aceite y ajos en el vaso. 3 min/160°C/vel 1 (modo dorado).", "Añadir el calabacín y el pimentón. 8 min/160°C/vel ↺1 (giro inverso, velocidad cuchara).", "Remover a mitad de cocción con la espátula si hace falta. Sal al servir."], "tags": ["calabacín", "dorado", "ajo", "pimentón", "rápido", "salteado"], "calories_approx": 70, "vegetableHidden": false, "cookidooSearchTerms": ["calabacín salteado", "calabacín al ajillo"], "tip": "El modo dorado a 160°C carameliza el calabacín y le da un sabor tostado increíble. Nada que ver con el calabacín hervido."}, {"id": "esparragos_jamon", "name": "Espárragos trigueros salteados con jamón", "category": "comida_primero", "mealTypes": ["comida", "cena"], "prepTime": 5, "cookTime": 10, "totalTime": 15, "servings": 2, "difficulty": "muy fácil", "thermomix": true, "ingredients": [{"item": "espárragos trigueros", "quantity": "2 manojos"}, {"item": "jamón serrano en taquitos", "quantity": "50g"}, {"item": "ajo", "quantity": "1 diente"}, {"item": "aceite de oliva", "quantity": "1 cucharada"}, {"item": "sal", "quantity": "al gusto"}], "thermomixSteps": ["Cortar espárragos en trozos de 3-4 cm. Laminar ajo.", "Echar aceite, ajo y jamón. 3 min/160°C/vel 1 (modo dorado).", "Añadir espárragos. 7 min/160°C/vel ↺1 (giro inverso).", "Servir inmediatamente."], "tags": ["espárragos", "jamón", "salteado", "dorado", "rápido"], "calories_approx": 95, "vegetableHidden": false, "cookidooSearchTerms": ["espárragos salteados", "espárragos jamón"], "tip": "El jamón le da un sabor salado y potente que hace que los espárragos estén buenísimos."}, {"id": "champinones_ajillo", "name": "Champiñones al ajillo dorados", "category": "comida_primero", "mealTypes": ["comida", "cena"], "prepTime": 5, "cookTime": 10, "totalTime": 15, "servings": 2, "difficulty": "muy fácil", "thermomix": true, "ingredients": [{"item": "champiñones", "quantity": "400g"}, {"item": "ajos", "quantity": "3 dientes"}, {"item": "perejil fresco", "quantity": "un puñado"}, {"item": "aceite de oliva", "quantity": "1 cucharada"}, {"item": "sal y pimienta", "quantity": "al gusto"}, {"item": "guindilla (opcional)", "quantity": "1 pequeña"}], "thermomixSteps": ["Picar ajo y perejil. 5 seg/vel 5. Reservar la mitad del perejil.", "Añadir aceite y guindilla. 2 min/160°C/vel 1 (modo dorado).", "Añadir champiñones laminados. 8 min/160°C/vel ↺1 (giro inverso).", "Añadir el perejil reservado y sal. Mezclar 10 seg/vel ↺1."], "tags": ["champiñones", "ajillo", "dorado", "rápido", "tapas"], "calories_approx": 80, "vegetableHidden": false, "cookidooSearchTerms": ["champiñones al ajillo", "champiñones salteados"], "tip": "Champiñones al ajillo: un clásico de bar que es 100% compatible con la dieta."}, {"id": "pimientos_caramelizados", "name": "Pimientos del piquillo caramelizados", "category": "comida_primero", "mealTypes": ["comida", "cena"], "prepTime": 3, "cookTime": 10, "totalTime": 13, "servings": 2, "difficulty": "muy fácil", "thermomix": true, "ingredients": [{"item": "pimientos del piquillo (bote)", "quantity": "1 bote (200g)"}, {"item": "ajo", "quantity": "1 diente"}, {"item": "aceite de oliva", "quantity": "1 cucharada"}, {"item": "sal", "quantity": "al gusto"}], "thermomixSteps": ["Laminar ajo. Echar con aceite al vaso. 2 min/160°C/vel 1.", "Añadir pimientos escurridos. 8 min/160°C/vel ↺1 (giro inverso).", "Se caramelizan por el azúcar natural del pimiento. Servir."], "tags": ["pimientos", "piquillo", "caramelizado", "dorado", "rápido"], "calories_approx": 55, "vegetableHidden": false, "cookidooSearchTerms": ["pimientos piquillo", "pimientos salteados"], "tip": "Los pimientos de bote ya vienen asados, solo hay que dorarlos. 3 minutos de prep."}, {"id": "berenjena_comino", "name": "Berenjena dorada con comino", "category": "comida_primero", "mealTypes": ["comida"], "prepTime": 5, "cookTime": 12, "totalTime": 17, "servings": 2, "difficulty": "fácil", "thermomix": true, "ingredients": [{"item": "berenjena", "quantity": "2 medianas"}, {"item": "comino en polvo", "quantity": "1/2 cucharadita"}, {"item": "ajo", "quantity": "1 diente"}, {"item": "aceite de oliva", "quantity": "1 cucharada"}, {"item": "sal", "quantity": "al gusto"}, {"item": "limón", "quantity": "unas gotas"}], "thermomixSteps": ["Cortar berenjena en dados de 2 cm.", "Echar aceite y ajo picado. 2 min/160°C/vel 1 (modo dorado).", "Añadir berenjena y comino. 10 min/160°C/vel ↺1 (giro inverso).", "Unas gotas de limón al servir."], "tags": ["berenjena", "comino", "dorado", "mediterráneo"], "calories_approx": 65, "vegetableHidden": false, "cookidooSearchTerms": ["berenjena salteada", "berenjena especias"], "tip": "El comino transforma la berenjena, le da un toque de Oriente Medio espectacular."}, {"id": "verduras_wok_asiatico", "name": "Verduras al wok estilo asiático", "category": "comida_primero", "mealTypes": ["comida", "cena"], "prepTime": 10, "cookTime": 10, "totalTime": 20, "servings": 2, "difficulty": "fácil", "thermomix": true, "ingredients": [{"item": "calabacín", "quantity": "1"}, {"item": "pimiento rojo", "quantity": "1"}, {"item": "champiñones", "quantity": "100g"}, {"item": "brotes de soja (opcional)", "quantity": "50g"}, {"item": "ajo", "quantity": "2 dientes"}, {"item": "jengibre fresco", "quantity": "1 cm rallado"}, {"item": "salsa de soja", "quantity": "1 cucharada"}, {"item": "aceite de oliva", "quantity": "1 cucharada"}], "thermomixSteps": ["Picar ajo y jengibre. 5 seg/vel 7.", "Añadir aceite. 2 min/160°C/vel 1 (modo dorado).", "Añadir todas las verduras cortadas en tiras finas. 8 min/160°C/vel ↺1 (giro inverso).", "Añadir soja en los últimos 2 minutos. Las verduras deben quedar al dente, con mordida."], "tags": ["wok", "asiático", "salteado", "verduras", "rápido", "jengibre"], "calories_approx": 85, "vegetableHidden": false, "cookidooSearchTerms": ["verduras salteadas", "wok verduras", "verduras asiáticas"], "tip": "La clave es cortar todo fino y que se haga rápido a fuego fuerte. Quedan crujientes, no blandas."}, {"id": "espinacas_pinones", "name": "Espinacas salteadas con piñones y ajo", "category": "comida_primero", "mealTypes": ["comida", "cena"], "prepTime": 3, "cookTime": 8, "totalTime": 11, "servings": 2, "difficulty": "muy fácil", "thermomix": true, "ingredients": [{"item": "espinacas frescas (o bolsa)", "quantity": "300g"}, {"item": "piñones", "quantity": "20g"}, {"item": "ajo", "quantity": "2 dientes"}, {"item": "aceite de oliva", "quantity": "1 cucharada"}, {"item": "sal", "quantity": "al gusto"}], "thermomixSteps": ["Echar piñones en el vaso. 3 min/160°C/vel 1 (se tuestan, modo dorado). Reservar.", "Echar aceite y ajo laminado. 2 min/160°C/vel 1.", "Añadir espinacas. 3 min/100°C/vel ↺1 (giro inverso). Se reducen rápido.", "Servir con los piñones por encima."], "tags": ["espinacas", "piñones", "salteado", "rápido", "ajo"], "calories_approx": 100, "vegetableHidden": false, "cookidooSearchTerms": ["espinacas salteadas", "espinacas piñones"], "tip": "Las espinacas salteadas con piñones tostados son un plato de restaurante. 11 minutos."}, {"id": "brocoli_ajo_guindilla", "name": "Brócoli salteado con ajo y guindilla", "category": "comida_primero", "mealTypes": ["comida", "cena"], "prepTime": 5, "cookTime": 12, "totalTime": 17, "servings": 2, "difficulty": "fácil", "thermomix": true, "ingredients": [{"item": "brócoli", "quantity": "400g"}, {"item": "ajo", "quantity": "3 dientes"}, {"item": "guindilla seca", "quantity": "1"}, {"item": "aceite de oliva", "quantity": "1 cucharada"}, {"item": "sal", "quantity": "al gusto"}], "thermomixSteps": ["Cortar brócoli en ramilletes pequeños.", "Echar aceite, ajo laminado y guindilla troceada. 2 min/160°C/vel 1 (modo dorado).", "Añadir brócoli. 10 min/160°C/vel ↺1 (giro inverso).", "El brócoli queda dorado por fuera y tierno por dentro."], "tags": ["brócoli", "ajo", "guindilla", "salteado", "dorado", "picante"], "calories_approx": 70, "vegetableHidden": false, "cookidooSearchTerms": ["brócoli salteado", "brócoli al ajillo"], "tip": "El brócoli dorado en lugar de hervido es otro mundo. Crujiente, con sabor a ajo y un toque picante."}, {"id": "pollo_hierbas_varoma", "name": "Pechuga de pollo al Varoma con hierbas provenzales", "category": "comida_segundo", "mealTypes": ["comida"], "prepTime": 5, "cookTime": 25, "totalTime": 30, "servings": 2, "difficulty": "muy fácil", "thermomix": true, "ingredients": [{"item": "pechugas de pollo", "quantity": "2 (300g total)"}, {"item": "hierbas provenzales", "quantity": "1 cucharada"}, {"item": "aceite de oliva", "quantity": "1 cucharadita"}, {"item": "sal y pimienta", "quantity": "al gusto"}, {"item": "limón", "quantity": "medio"}, {"item": "agua", "quantity": "500ml"}], "thermomixSteps": ["Echar 500ml de agua en el vaso (puedes hacer crema de verdura ahí debajo mientras).", "Salpimentar las pechugas, untar con aceite y hierbas provenzales.", "Colocar en el Varoma sobre papel de horno.", "Programar 25 min/Varoma/vel 1.", "Exprimir medio limón por encima al servir."], "tags": ["pollo", "varoma", "vapor", "hierbas", "provenzales", "ligero"], "calories_approx": 220, "vegetableHidden": false, "cookidooSearchTerms": ["pechuga pollo varoma", "pollo al vapor hierbas"], "tip": "TRUCO: Mientras el pollo se hace arriba en el Varoma, haz una crema de verdura en el vaso de abajo. Dos platos en una vez."}, {"id": "solomillo_cerdo_pimientos", "name": "Solomillo de cerdo al vapor con pimientos", "category": "comida_segundo", "mealTypes": ["comida"], "prepTime": 10, "cookTime": 30, "totalTime": 40, "servings": 2, "difficulty": "fácil", "thermomix": true, "ingredients": [{"item": "solomillo de cerdo", "quantity": "400g"}, {"item": "pimiento rojo", "quantity": "1"}, {"item": "pimiento verde", "quantity": "1"}, {"item": "aceite de oliva", "quantity": "1 cucharadita"}, {"item": "sal, pimienta y orégano", "quantity": "al gusto"}, {"item": "agua", "quantity": "500ml"}], "thermomixSteps": ["Echar 500ml agua en el vaso.", "Colocar pimientos en tiras en la bandeja Varoma.", "Poner solomillo salpimentado encima, untar con aceite y orégano.", "Programar 30 min/Varoma/vel 1.", "Dejar reposar 5 min tapado. Cortar en medallones."], "tags": ["solomillo", "cerdo", "varoma", "vapor", "pimientos"], "calories_approx": 250, "vegetableHidden": false, "cookidooSearchTerms": ["solomillo cerdo varoma", "solomillo al vapor"], "tip": "El solomillo de cerdo al vapor queda muy jugoso. Córtalo en medallones gordos."}, {"id": "ternera_guisada_suave", "name": "Ternera guisada suave en TM7", "category": "comida_segundo", "mealTypes": ["comida"], "prepTime": 10, "cookTime": 45, "totalTime": 55, "servings": 4, "difficulty": "media", "thermomix": true, "ingredients": [{"item": "ternera para guisar", "quantity": "500g (en dados)"}, {"item": "cebolla", "quantity": "1"}, {"item": "tomate triturado", "quantity": "200g"}, {"item": "pimiento rojo", "quantity": "1"}, {"item": "ajo", "quantity": "2 dientes"}, {"item": "aceite de oliva", "quantity": "1 cucharada"}, {"item": "agua o caldo", "quantity": "200ml"}, {"item": "sal, pimienta y laurel", "quantity": "al gusto"}], "thermomixSteps": ["Trocear cebolla, pimiento y ajo. 5 seg/vel 5.", "Añadir aceite. 5 min/160°C/vel 1 (modo dorado para sofreír bien).", "Añadir la ternera en dados. 5 min/160°C/vel ↺1 (sellar la carne).", "Añadir tomate, agua, laurel, sal y pimienta. 35 min/100°C/vel ↺1 (giro inverso, velocidad cuchara).", "La carne queda tierna y entera gracias al giro inverso."], "tags": ["ternera", "guisada", "estofado", "giro inverso", "reconfortante"], "calories_approx": 280, "vegetableHidden": true, "cookidooSearchTerms": ["ternera guisada", "estofado ternera", "guiso ternera"], "tip": "El giro inverso es la clave: la carne se cocina sin deshacerse. Las verduras del sofrito quedan integradas en la salsa."}, {"id": "pollo_curry_ligero", "name": "Pollo al curry ligero (sin nata)", "category": "comida_segundo", "mealTypes": ["comida"], "prepTime": 10, "cookTime": 25, "totalTime": 35, "servings": 2, "difficulty": "fácil", "thermomix": true, "ingredients": [{"item": "pechuga de pollo", "quantity": "300g (en trozos)"}, {"item": "cebolla", "quantity": "1"}, {"item": "tomate triturado", "quantity": "150g"}, {"item": "curry en polvo", "quantity": "1 cucharada"}, {"item": "ajo", "quantity": "1 diente"}, {"item": "jengibre", "quantity": "1/2 cucharadita"}, {"item": "aceite de oliva", "quantity": "1 cucharada"}, {"item": "agua", "quantity": "100ml"}, {"item": "sal", "quantity": "al gusto"}], "thermomixSteps": ["Trocear cebolla y ajo. 5 seg/vel 5.", "Añadir aceite, curry y jengibre. 5 min/120°C/vel 1 (sofreír especias).", "Añadir pollo en trozos. 3 min/160°C/vel ↺1 (sellar con modo dorado).", "Añadir tomate, agua y sal. 17 min/100°C/vel ↺1 (giro inverso).", "El pollo queda entero en una salsa de curry increíble."], "tags": ["pollo", "curry", "ligero", "sin nata", "especias", "giro inverso"], "calories_approx": 240, "vegetableHidden": true, "cookidooSearchTerms": ["pollo al curry", "curry de pollo ligero"], "tip": "Sin nata ni leche de coco, este curry es ligero pero con un sabor brutal gracias a las especias tostadas."}, {"id": "albondigas_pavo_tomate", "name": "Albóndigas de pavo en salsa de tomate", "category": "comida_segundo", "mealTypes": ["comida"], "prepTime": 15, "cookTime": 25, "totalTime": 40, "servings": 4, "difficulty": "fácil", "thermomix": true, "ingredients": [{"item": "carne picada de pavo", "quantity": "400g"}, {"item": "huevo", "quantity": "1"}, {"item": "ajo", "quantity": "1 diente (rallado)"}, {"item": "perejil picado", "quantity": "1 cucharada"}, {"item": "sal y pimienta", "quantity": "al gusto"}, {"item": "tomate triturado", "quantity": "400g"}, {"item": "cebolla", "quantity": "1 pequeña"}, {"item": "aceite de oliva", "quantity": "1 cucharada"}], "thermomixSteps": ["Primero hacer las albóndigas a mano: mezclar pavo, huevo, ajo, perejil, sal y pimienta. Formar bolas.", "En TM7: trocear cebolla 5 seg/vel 5. Añadir aceite. 5 min/120°C/vel 1.", "Añadir tomate triturado. 5 min/100°C/vel 1.", "Con cuidado, introducir las albóndigas en la salsa.", "Programar 15 min/100°C/vel ↺1 (giro inverso, cuchara para no romperlas)."], "tags": ["albóndigas", "pavo", "tomate", "salsa", "casero", "giro inverso"], "calories_approx": 230, "vegetableHidden": true, "cookidooSearchTerms": ["albóndigas thermomix", "albóndigas salsa tomate"], "tip": "Haz el doble de albóndigas y congela la mitad. Así tienes comida para otro día en 5 minutos."}, {"id": "hamburguesa_pollo_casera", "name": "Hamburguesas de pollo caseras", "category": "comida_segundo", "mealTypes": ["comida"], "prepTime": 10, "cookTime": 12, "totalTime": 22, "servings": 4, "difficulty": "fácil", "thermomix": true, "ingredients": [{"item": "pechuga de pollo", "quantity": "400g"}, {"item": "cebolla", "quantity": "1/4"}, {"item": "ajo", "quantity": "1 diente"}, {"item": "perejil", "quantity": "un poco"}, {"item": "huevo", "quantity": "1"}, {"item": "sal, pimienta y orégano", "quantity": "al gusto"}], "thermomixSteps": ["Trocear pollo, cebolla, ajo y perejil en el vaso. 10 seg/vel 6 (no más, que quede con textura).", "Pasar a un bol, añadir huevo, sal, pimienta y orégano. Mezclar con las manos.", "Formar 4 hamburguesas. Hacerlas a la plancha/sartén 5-6 min por lado.", "Alternativa TM7: se pueden hacer al Varoma 20 min/Varoma/vel 1 (más ligeras)."], "tags": ["hamburguesa", "pollo", "casera", "picada", "fácil"], "calories_approx": 210, "vegetableHidden": true, "cookidooSearchTerms": ["hamburguesa pollo", "burger pollo thermomix"], "tip": "La cebolla y el ajo van DENTRO de la hamburguesa, así comes verdura sin darte cuenta."}, {"id": "lomo_cerdo_champinones", "name": "Lomo de cerdo con champiñones", "category": "comida_segundo", "mealTypes": ["comida"], "prepTime": 10, "cookTime": 20, "totalTime": 30, "servings": 2, "difficulty": "fácil", "thermomix": true, "ingredients": [{"item": "lomo de cerdo en filetes", "quantity": "300g"}, {"item": "champiñones", "quantity": "200g"}, {"item": "ajo", "quantity": "2 dientes"}, {"item": "perejil", "quantity": "un poco"}, {"item": "aceite de oliva", "quantity": "1 cucharada"}, {"item": "sal y pimienta", "quantity": "al gusto"}], "thermomixSteps": ["Picar ajo y perejil. 5 seg/vel 5. Reservar.", "Echar aceite y lomo troceado. 5 min/160°C/vel ↺1 (sellar en modo dorado).", "Añadir champiñones laminados. 10 min/160°C/vel ↺1.", "Añadir el ajo-perejil picado y sal. 2 min/100°C/vel ↺1."], "tags": ["lomo", "cerdo", "champiñones", "dorado", "rápido"], "calories_approx": 260, "vegetableHidden": false, "cookidooSearchTerms": ["lomo cerdo champiñones", "cerdo setas"], "tip": "El modo dorado del TM7 sella la carne por fuera, dejándola jugosa por dentro."}, {"id": "pollo_limon_tomillo", "name": "Pollo al limón y tomillo", "category": "comida_segundo", "mealTypes": ["comida"], "prepTime": 5, "cookTime": 25, "totalTime": 30, "servings": 2, "difficulty": "fácil", "thermomix": true, "ingredients": [{"item": "pechugas de pollo", "quantity": "2"}, {"item": "limón", "quantity": "1 (zumo y ralladura)"}, {"item": "tomillo seco", "quantity": "1 cucharadita"}, {"item": "ajo", "quantity": "1 diente"}, {"item": "aceite de oliva", "quantity": "1 cucharada"}, {"item": "sal y pimienta", "quantity": "al gusto"}, {"item": "agua", "quantity": "100ml"}], "thermomixSteps": ["Picar ajo. 5 seg/vel 5.", "Añadir aceite. 3 min/160°C/vel 1 (modo dorado).", "Añadir pechugas. Sellar 3 min/160°C/vel ↺1.", "Añadir zumo de limón, ralladura, tomillo, agua y sal. 17 min/100°C/vel ↺1 (giro inverso).", "La salsa de limón queda concentrada y aromática."], "tags": ["pollo", "limón", "tomillo", "aromático", "salsa"], "calories_approx": 230, "vegetableHidden": false, "cookidooSearchTerms": ["pollo limón", "pollo al limón thermomix"], "tip": "La ralladura de limón aporta mucho más aroma que solo el zumo. No te la saltes."}, {"id": "entrecot_plancha_pimientos", "name": "Entrecot a la plancha con pimientos salteados", "category": "comida_segundo", "mealTypes": ["comida"], "prepTime": 5, "cookTime": 15, "totalTime": 20, "servings": 2, "difficulty": "fácil", "thermomix": false, "ingredients": [{"item": "entrecot de ternera", "quantity": "2 filetes (200g c/u)"}, {"item": "pimiento verde", "quantity": "1"}, {"item": "pimiento rojo", "quantity": "1"}, {"item": "ajo", "quantity": "1 diente"}, {"item": "aceite de oliva", "quantity": "1 cucharada"}, {"item": "sal gorda", "quantity": "al gusto"}], "thermomixSteps": ["El entrecot es mejor a la plancha/sartén directamente. Sal gorda y 3-4 min por lado.", "Para los pimientos: picar en tiras. En TM7: aceite y ajo, 2 min/160°C/vel 1. Añadir pimientos, 8 min/160°C/vel ↺1.", "Servir el entrecot con los pimientos por encima."], "tags": ["entrecot", "ternera", "plancha", "pimientos", "clásico"], "calories_approx": 300, "vegetableHidden": false, "cookidooSearchTerms": ["entrecot", "ternera plancha"], "tip": "Saca la carne de la nevera 30 min antes. A temperatura ambiente se hace mucho mejor."}, {"id": "filete_ternera_setas", "name": "Filete de ternera con setas salteadas", "category": "comida_segundo", "mealTypes": ["comida"], "prepTime": 5, "cookTime": 15, "totalTime": 20, "servings": 2, "difficulty": "fácil", "thermomix": true, "ingredients": [{"item": "filetes de ternera", "quantity": "2 (150g c/u)"}, {"item": "setas variadas", "quantity": "200g"}, {"item": "ajo", "quantity": "2 dientes"}, {"item": "aceite de oliva", "quantity": "1 cucharada"}, {"item": "perejil", "quantity": "al gusto"}, {"item": "sal y pimienta", "quantity": "al gusto"}], "thermomixSteps": ["Picar ajo. 5 seg/vel 5.", "Añadir aceite. 2 min/160°C/vel 1 (modo dorado).", "Añadir filetes de ternera. 4 min/160°C/vel ↺1 (sellar).", "Añadir setas. 8 min/160°C/vel ↺1. Sal y perejil al final."], "tags": ["ternera", "setas", "dorado", "salteado", "rápido"], "calories_approx": 270, "vegetableHidden": false, "cookidooSearchTerms": ["ternera setas", "carne setas thermomix"], "tip": "Las setas en modo dorado quedan con una textura y sabor de restaurante."}, {"id": "merluza_varoma_limon", "name": "Merluza al Varoma con limón y perejil", "category": "cena", "mealTypes": ["cena"], "prepTime": 5, "cookTime": 20, "totalTime": 25, "servings": 2, "difficulty": "muy fácil", "thermomix": true, "ingredients": [{"item": "lomos de merluza", "quantity": "2 (200g c/u)"}, {"item": "limón", "quantity": "1"}, {"item": "perejil fresco", "quantity": "un puñado"}, {"item": "aceite de oliva", "quantity": "1 cucharada"}, {"item": "sal", "quantity": "al gusto"}, {"item": "agua", "quantity": "500ml"}], "thermomixSteps": ["Echar 500ml de agua en el vaso.", "Colocar los lomos de merluza en el Varoma sobre unas rodajas de limón.", "Salpimentar. Programar 20 min/Varoma/vel 1.", "Al servir: aceite de oliva en crudo y perejil picado."], "tags": ["merluza", "varoma", "vapor", "limón", "cena", "ligero", "rápido"], "calories_approx": 180, "vegetableHidden": false, "cookidooSearchTerms": ["merluza varoma", "merluza al vapor"], "tip": "Pon unas rodajas de limón debajo del pescado en el Varoma. Aromatiza mientras se cocina."}, {"id": "salmon_vapor_eneldo", "name": "Salmón al vapor con eneldo", "category": "cena", "mealTypes": ["cena"], "prepTime": 5, "cookTime": 18, "totalTime": 23, "servings": 2, "difficulty": "muy fácil", "thermomix": true, "ingredients": [{"item": "lomos de salmón", "quantity": "2 (150g c/u)"}, {"item": "eneldo seco o fresco", "quantity": "1 cucharadita"}, {"item": "limón", "quantity": "medio"}, {"item": "aceite de oliva", "quantity": "1 cucharada"}, {"item": "sal y pimienta", "quantity": "al gusto"}, {"item": "agua", "quantity": "500ml"}], "thermomixSteps": ["Echar 500ml agua en el vaso.", "Colocar salmón en el Varoma. Salpimentar y espolvorear eneldo.", "Programar 18 min/Varoma/vel 1.", "Servir con limón y un chorrito de aceite."], "tags": ["salmón", "vapor", "varoma", "eneldo", "omega-3", "pescado azul", "cena"], "calories_approx": 250, "vegetableHidden": false, "cookidooSearchTerms": ["salmón varoma", "salmón al vapor"], "tip": "El salmón es pescado azul: 2 veces por semana según la dieta. Rico en omega-3."}, {"id": "gambas_ajillo_tm7", "name": "Gambas al ajillo en TM7", "category": "cena", "mealTypes": ["cena"], "prepTime": 5, "cookTime": 10, "totalTime": 15, "servings": 2, "difficulty": "muy fácil", "thermomix": true, "ingredients": [{"item": "gambas peladas", "quantity": "300g"}, {"item": "ajos", "quantity": "4 dientes"}, {"item": "guindilla", "quantity": "1 (opcional)"}, {"item": "aceite de oliva", "quantity": "2 cucharadas"}, {"item": "perejil", "quantity": "al gusto"}, {"item": "sal", "quantity": "al gusto"}], "thermomixSteps": ["Laminar ajos y trocear guindilla. Echar con aceite al vaso.", "Programar 3 min/160°C/vel 1 (modo dorado).", "Añadir gambas y sal. 5 min/100°C/vel ↺1 (giro inverso).", "Espolvorear perejil. Servir inmediatamente, chisporroteando."], "tags": ["gambas", "ajillo", "dorado", "rápido", "cena", "marisco", "tapas"], "calories_approx": 190, "vegetableHidden": false, "cookidooSearchTerms": ["gambas al ajillo", "gambas thermomix"], "tip": "Un clásico total de bar, listo en 15 minutos. Acompañar con unos espárragos salteados."}, {"id": "mejillones_vino", "name": "Mejillones al vapor con vino blanco", "category": "cena", "mealTypes": ["cena"], "prepTime": 10, "cookTime": 15, "totalTime": 25, "servings": 2, "difficulty": "fácil", "thermomix": true, "ingredients": [{"item": "mejillones", "quantity": "1 kg"}, {"item": "vino blanco", "quantity": "100ml"}, {"item": "ajo", "quantity": "2 dientes"}, {"item": "perejil", "quantity": "al gusto"}, {"item": "agua", "quantity": "300ml"}], "thermomixSteps": ["Limpiar mejillones (raspar y quitar barbas).", "Echar agua, vino y ajo picado en el vaso.", "Colocar mejillones en el Varoma.", "Programar 15 min/Varoma/vel 1.", "Abrir Varoma. Los que no se hayan abierto, desechar. Perejil al servir."], "tags": ["mejillones", "vapor", "varoma", "vino", "marisco", "cena"], "calories_approx": 150, "vegetableHidden": false, "cookidooSearchTerms": ["mejillones varoma", "mejillones al vapor"], "tip": "El alcohol del vino se evapora al cocinar, solo queda el sabor."}, {"id": "langostinos_varoma", "name": "Langostinos al Varoma perfectos", "category": "cena", "mealTypes": ["cena"], "prepTime": 5, "cookTime": 12, "totalTime": 17, "servings": 2, "difficulty": "muy fácil", "thermomix": true, "ingredients": [{"item": "langostinos", "quantity": "500g"}, {"item": "agua", "quantity": "500ml"}, {"item": "sal gorda", "quantity": "1 cucharada"}, {"item": "laurel", "quantity": "1 hoja"}, {"item": "limón", "quantity": "1"}], "thermomixSteps": ["Echar agua con sal gorda y laurel en el vaso.", "Colocar langostinos en el Varoma.", "Programar 12 min/Varoma/vel 1.", "Servir con limón. Perfectos, jugosos."], "tags": ["langostinos", "varoma", "vapor", "marisco", "rápido", "cena"], "calories_approx": 130, "vegetableHidden": false, "cookidooSearchTerms": ["langostinos varoma", "langostinos al vapor"], "tip": "No los pases de cocción o quedan gomosos. 12 minutos son perfectos para langostinos medianos."}, {"id": "sepia_ajo_perejil", "name": "Sepia con ajo y perejil", "category": "cena", "mealTypes": ["cena", "comida"], "prepTime": 5, "cookTime": 15, "totalTime": 20, "servings": 2, "difficulty": "fácil", "thermomix": true, "ingredients": [{"item": "sepia limpia", "quantity": "400g"}, {"item": "ajos", "quantity": "3 dientes"}, {"item": "perejil fresco", "quantity": "un puñado"}, {"item": "aceite de oliva", "quantity": "1 cucharada"}, {"item": "sal", "quantity": "al gusto"}, {"item": "vino blanco (opcional)", "quantity": "un chorrito"}], "thermomixSteps": ["Picar ajo y perejil. 5 seg/vel 5. Reservar mitad.", "Añadir aceite. 2 min/160°C/vel 1 (modo dorado).", "Añadir sepia troceada. 10 min/100°C/vel ↺1 (giro inverso).", "Añadir el perejil reservado y un chorrito de vino. 2 min/100°C/vel ↺1."], "tags": ["sepia", "ajo", "perejil", "marisco", "cena", "dorado"], "calories_approx": 160, "vegetableHidden": false, "cookidooSearchTerms": ["sepia thermomix", "sepia al ajillo"], "tip": "La sepia necesita cocción suave para quedar tierna. El giro inverso es perfecto."}, {"id": "calamares_salsa_tomate", "name": "Calamares en salsa de tomate", "category": "cena", "mealTypes": ["cena"], "prepTime": 10, "cookTime": 25, "totalTime": 35, "servings": 2, "difficulty": "fácil", "thermomix": true, "ingredients": [{"item": "calamares limpios", "quantity": "400g (en anillas)"}, {"item": "cebolla", "quantity": "1"}, {"item": "tomate triturado", "quantity": "300g"}, {"item": "ajo", "quantity": "2 dientes"}, {"item": "aceite de oliva", "quantity": "1 cucharada"}, {"item": "sal y pimienta", "quantity": "al gusto"}, {"item": "laurel", "quantity": "1 hoja"}], "thermomixSteps": ["Trocear cebolla y ajo. 5 seg/vel 5.", "Añadir aceite. 5 min/120°C/vel 1.", "Añadir calamares en anillas. 3 min/160°C/vel ↺1 (sellar en modo dorado).", "Añadir tomate, laurel, sal y pimienta. 17 min/100°C/vel ↺1 (giro inverso)."], "tags": ["calamares", "tomate", "salsa", "guiso", "giro inverso", "cena"], "calories_approx": 170, "vegetableHidden": true, "cookidooSearchTerms": ["calamares en salsa", "calamares tomate thermomix"], "tip": "Los calamares en salsa quedan tiernos con el giro inverso. Un plato de abuela hecho en TM7."}, {"id": "revuelto_setas_gambas", "name": "Revuelto de setas y gambas", "category": "cena", "mealTypes": ["cena"], "prepTime": 5, "cookTime": 10, "totalTime": 15, "servings": 2, "difficulty": "fácil", "thermomix": false, "ingredients": [{"item": "setas variadas", "quantity": "200g"}, {"item": "gambas peladas", "quantity": "150g"}, {"item": "huevos", "quantity": "3"}, {"item": "ajo", "quantity": "1 diente"}, {"item": "aceite de oliva", "quantity": "1 cucharada"}, {"item": "sal y perejil", "quantity": "al gusto"}], "thermomixSteps": ["Mejor en sartén para esta receta.", "Picar ajo en TM7: 5 seg/vel 5.", "En sartén: aceite + ajo 1 min. Añadir setas 4 min. Añadir gambas 2 min.", "Batir huevos en TM7: 5 seg/vel 4. Verter en sartén y revolver hasta cuajar ligeramente.", "Perejil fresco por encima."], "tags": ["revuelto", "setas", "gambas", "huevos", "cena", "rápido"], "calories_approx": 220, "vegetableHidden": false, "cookidooSearchTerms": ["revuelto setas", "revuelto gambas"], "tip": "El revuelto se debe servir cremoso, no seco. Retira del fuego un poco antes de que cuaje del todo."}, {"id": "tortilla_francesa_tm", "name": "Tortilla francesa express", "category": "cena", "mealTypes": ["cena", "almuerzo"], "prepTime": 2, "cookTime": 5, "totalTime": 7, "servings": 1, "difficulty": "muy fácil", "thermomix": true, "ingredients": [{"item": "huevos", "quantity": "2"}, {"item": "sal", "quantity": "una pizca"}, {"item": "aceite de oliva", "quantity": "unas gotas"}], "thermomixSteps": ["Batir huevos con sal en TM7: 5 seg/vel 4.", "Calentar sartén antiadherente con unas gotas de aceite.", "Verter y cuajar 2-3 min por lado.", "Se puede rellenar con queso fresco, jamón o champiñones."], "tags": ["tortilla", "huevos", "rápido", "básico", "cena", "7 minutos"], "calories_approx": 180, "vegetableHidden": false, "cookidooSearchTerms": ["tortilla francesa"], "tip": "La cena más rápida de la dieta. 7 minutos. Rellénala con algo para variar."}, {"id": "huevos_duros_tm", "name": "Huevos duros perfectos en TM7", "category": "base", "mealTypes": ["comida", "cena"], "prepTime": 1, "cookTime": 13, "totalTime": 14, "servings": 4, "difficulty": "muy fácil", "thermomix": true, "ingredients": [{"item": "huevos", "quantity": "4-6"}, {"item": "agua", "quantity": "500ml"}], "thermomixSteps": ["Echar 500ml de agua en el vaso.", "Colocar huevos en el cestillo o Varoma.", "Programar 13 min/Varoma/vel 1.", "Pasar por agua fría. Pelar."], "tags": ["huevos", "duros", "básico", "varoma", "batch cooking"], "calories_approx": 155, "vegetableHidden": false, "cookidooSearchTerms": ["huevos duros varoma", "huevos cocidos thermomix"], "tip": "Haz 6 de golpe y guárdalos pelados en la nevera. Perfectos para ensaladas y cenas rápidas."}, {"id": "bacalao_tomate_confitado", "name": "Bacalao al vapor con tomate confitado", "category": "cena", "mealTypes": ["cena"], "prepTime": 10, "cookTime": 20, "totalTime": 30, "servings": 2, "difficulty": "fácil", "thermomix": true, "ingredients": [{"item": "lomos de bacalao fresco", "quantity": "2 (200g c/u)"}, {"item": "tomates cherry", "quantity": "200g"}, {"item": "ajo", "quantity": "2 dientes"}, {"item": "aceite de oliva", "quantity": "1 cucharada"}, {"item": "albahaca", "quantity": "al gusto"}, {"item": "sal", "quantity": "al gusto"}, {"item": "agua", "quantity": "500ml"}], "thermomixSteps": ["Cortar tomates cherry por la mitad. Mezclar con ajo picado, aceite, sal y albahaca.", "Echar 500ml agua en el vaso.", "En el Varoma: poner los tomates aliñados como base, el bacalao encima.", "Programar 20 min/Varoma/vel 1.", "Los tomates se confitan con el vapor y quedan como una salsa."], "tags": ["bacalao", "tomate", "confitado", "varoma", "cena", "elegante"], "calories_approx": 200, "vegetableHidden": false, "cookidooSearchTerms": ["bacalao varoma", "bacalao al vapor tomate"], "tip": "Los cherry confitados al vapor son una guarnición estrella. Dulces y concentrados."}, {"id": "lubina_varoma_verduritas", "name": "Lubina al Varoma con verduritas", "category": "cena", "mealTypes": ["cena"], "prepTime": 10, "cookTime": 20, "totalTime": 30, "servings": 2, "difficulty": "fácil", "thermomix": true, "ingredients": [{"item": "lubina en lomos", "quantity": "2 (200g c/u)"}, {"item": "calabacín", "quantity": "1 pequeño"}, {"item": "pimiento rojo", "quantity": "1/2"}, {"item": "champiñones", "quantity": "100g"}, {"item": "aceite de oliva", "quantity": "1 cucharada"}, {"item": "sal, pimienta y tomillo", "quantity": "al gusto"}, {"item": "agua", "quantity": "500ml"}], "thermomixSteps": ["Echar 500ml agua en el vaso.", "En la bandeja Varoma: verduras cortadas finas.", "Encima de las verduras: lubina salpimentada con tomillo.", "Programar 20 min/Varoma/vel 1.", "Aliñar con aceite en crudo al servir."], "tags": ["lubina", "varoma", "vapor", "verduras", "cena", "ligero"], "calories_approx": 190, "vegetableHidden": false, "cookidooSearchTerms": ["lubina varoma", "lubina al vapor verduras"], "tip": "Las verduras cortadas finas se hacen rápido y quedan al dente bajo el pescado."}, {"id": "menu_crema_calabacin_pollo", "name": "MENÚ COMPLETO: Crema de calabacín + Pollo al vapor", "category": "menu_completo", "mealTypes": ["comida"], "prepTime": 10, "cookTime": 30, "totalTime": 40, "servings": 2, "difficulty": "fácil", "thermomix": true, "ingredients": [{"item": "calabacín", "quantity": "3 medianos (500g)"}, {"item": "cebolla", "quantity": "1 pequeña"}, {"item": "curry en polvo", "quantity": "1/2 cucharadita"}, {"item": "aceite de oliva", "quantity": "1 cucharada"}, {"item": "agua", "quantity": "500ml"}, {"item": "sal y pimienta", "quantity": "al gusto"}, {"item": "pechugas de pollo", "quantity": "2"}, {"item": "hierbas provenzales", "quantity": "1 cucharadita"}, {"item": "limón", "quantity": "medio"}], "thermomixSteps": ["Trocear cebolla. 5 seg/vel 5.", "Añadir aceite y curry. 5 min/120°C/vel 1.", "Añadir calabacín troceado y agua. Sal.", "MIENTRAS: salpimentar las pechugas con hierbas provenzales y colocar en el Varoma.", "Colocar Varoma encima del vaso. Programar 25 min/Varoma/vel 1.", "Retirar el Varoma (pollo listo). Triturar la crema: 1 min/vel 5-10.", "Servir la crema como primero y el pollo como segundo con limón."], "tags": ["menú completo", "dos platos", "varoma", "crema", "pollo", "30 minutos"], "calories_approx": 300, "vegetableHidden": true, "cookidooSearchTerms": ["menú completo varoma", "dos platos thermomix"], "tip": "EL TRUCO MAESTRO del TM7: la crema se hace en el vaso mientras la proteína se cocina al vapor arriba. Dos platos, una sola máquina, 30 minutos."}, {"id": "menu_crema_verduras_merluza", "name": "MENÚ COMPLETO: Crema de verduras + Merluza al vapor", "category": "menu_completo", "mealTypes": ["comida"], "prepTime": 10, "cookTime": 25, "totalTime": 35, "servings": 2, "difficulty": "fácil", "thermomix": true, "ingredients": [{"item": "calabacín", "quantity": "1"}, {"item": "puerro", "quantity": "1"}, {"item": "cebolla", "quantity": "1 pequeña"}, {"item": "aceite de oliva", "quantity": "1 cucharada"}, {"item": "agua", "quantity": "500ml"}, {"item": "sal, pimienta, nuez moscada", "quantity": "al gusto"}, {"item": "merluza (lomos)", "quantity": "2"}, {"item": "limón", "quantity": "1"}], "thermomixSteps": ["Trocear cebolla y puerro. 5 seg/vel 5.", "Añadir aceite. 5 min/120°C/vel 1.", "Añadir calabacín y agua. Sal y nuez moscada.", "Colocar merluza salpimentada con rodajas de limón en el Varoma.", "Programar 20 min/Varoma/vel 1.", "Retirar Varoma. Triturar crema: 1 min/vel 5-10.", "Primero: crema de verduras. Segundo: merluza con limón y aceite."], "tags": ["menú completo", "varoma", "crema", "merluza", "pescado", "35 minutos"], "calories_approx": 250, "vegetableHidden": true, "cookidooSearchTerms": ["menú completo varoma pescado"], "tip": "Perfecto para días de semana: todo listo en 35 minutos sin manchar más que la TM7."}, {"id": "menu_crema_brocoli_salmon", "name": "MENÚ COMPLETO: Crema de brócoli + Salmón al vapor", "category": "menu_completo", "mealTypes": ["comida"], "prepTime": 10, "cookTime": 25, "totalTime": 35, "servings": 2, "difficulty": "fácil", "thermomix": true, "ingredients": [{"item": "brócoli", "quantity": "400g"}, {"item": "cebolla", "quantity": "1 pequeña"}, {"item": "pimentón ahumado", "quantity": "1/2 cucharadita"}, {"item": "aceite de oliva", "quantity": "1 cucharada"}, {"item": "agua", "quantity": "500ml"}, {"item": "sal", "quantity": "al gusto"}, {"item": "salmón (lomos)", "quantity": "2"}, {"item": "eneldo", "quantity": "1 cucharadita"}], "thermomixSteps": ["Trocear cebolla. 5 seg/vel 5.", "Añadir aceite y pimentón. 4 min/120°C/vel 1.", "Añadir brócoli y agua. Sal.", "Salmón salpimentado con eneldo en el Varoma.", "Programar 22 min/Varoma/vel 1.", "Retirar Varoma. Triturar: 1 min/vel 5-10.", "Primero: crema de brócoli. Segundo: salmón con limón."], "tags": ["menú completo", "varoma", "brócoli", "salmón", "omega-3"], "calories_approx": 330, "vegetableHidden": true, "cookidooSearchTerms": ["menú varoma salmón brócoli"], "tip": "Salmón = pescado azul (omega-3). La dieta recomienda 2 veces por semana."}, {"id": "menu_sopa_verduras_solomillo", "name": "MENÚ COMPLETO: Sopa de verduras + Solomillo al vapor", "category": "menu_completo", "mealTypes": ["comida"], "prepTime": 10, "cookTime": 30, "totalTime": 40, "servings": 2, "difficulty": "fácil", "thermomix": true, "ingredients": [{"item": "calabacín", "quantity": "1"}, {"item": "puerro", "quantity": "1"}, {"item": "judías verdes", "quantity": "100g"}, {"item": "aceite de oliva", "quantity": "1 cucharada"}, {"item": "agua", "quantity": "600ml"}, {"item": "sal y pimienta", "quantity": "al gusto"}, {"item": "solomillo de cerdo", "quantity": "300g"}, {"item": "orégano", "quantity": "al gusto"}], "thermomixSteps": ["Trocear verduras. 5 seg/vel 5.", "Añadir aceite. 5 min/120°C/vel 1.", "Añadir agua y sal.", "Solomillo salpimentado con orégano en el Varoma.", "Programar 25 min/Varoma/vel 1.", "Retirar Varoma. Triturar sopa parcialmente (vel 5, 30 seg) o dejar con trozos.", "Primero: sopa de verduras. Segundo: solomillo en medallones."], "tags": ["menú completo", "sopa", "solomillo", "cerdo", "varoma"], "calories_approx": 330, "vegetableHidden": true, "cookidooSearchTerms": ["menú varoma solomillo"], "tip": "El solomillo de cerdo al vapor queda increíblemente jugoso. Cortarlo en medallones gruesos."}, {"id": "menu_crema_champinones_pavo", "name": "MENÚ COMPLETO: Crema de champiñones + Pavo al vapor", "category": "menu_completo", "mealTypes": ["comida"], "prepTime": 10, "cookTime": 25, "totalTime": 35, "servings": 2, "difficulty": "fácil", "thermomix": true, "ingredients": [{"item": "champiñones", "quantity": "300g"}, {"item": "cebolla", "quantity": "1 pequeña"}, {"item": "tomillo", "quantity": "1 cucharadita"}, {"item": "aceite de oliva", "quantity": "1 cucharada"}, {"item": "agua", "quantity": "400ml"}, {"item": "sal y pimienta", "quantity": "al gusto"}, {"item": "pechuga de pavo", "quantity": "2 filetes"}, {"item": "hierbas provenzales", "quantity": "al gusto"}], "thermomixSteps": ["Trocear cebolla. 5 seg/vel 5.", "Añadir aceite y tomillo. 5 min/120°C/vel 1.", "Añadir champiñones y agua. Sal.", "Pavo salpimentado con hierbas en el Varoma.", "Programar 20 min/Varoma/vel 1.", "Retirar Varoma. Triturar: 1 min/vel 5-10.", "Primero: crema de champiñones. Segundo: pavo con limón."], "tags": ["menú completo", "champiñones", "pavo", "varoma", "ligero"], "calories_approx": 270, "vegetableHidden": true, "cookidooSearchTerms": ["menú varoma pavo champiñones"], "tip": "El pavo es la proteína más magra. Ideal si quieres una comida muy ligera."}, {"id": "ensalada_mixta_atun", "name": "Ensalada mixta con atún", "category": "comida_completa", "mealTypes": ["comida"], "prepTime": 10, "cookTime": 0, "totalTime": 10, "servings": 1, "difficulty": "muy fácil", "thermomix": false, "ingredients": [{"item": "lechuga", "quantity": "un puñado"}, {"item": "tomate", "quantity": "1"}, {"item": "cebolla", "quantity": "un poco"}, {"item": "atún al natural (lata)", "quantity": "1"}, {"item": "aceite de oliva", "quantity": "1 cucharada"}, {"item": "vinagre o limón", "quantity": "al gusto"}, {"item": "sal", "quantity": "al gusto"}], "thermomixSteps": ["No necesita Thermomix.", "Lavar y trocear lechuga. Cortar tomate y cebolla.", "Escurrir el atún y añadir.", "Aliñar con aceite, vinagre y sal."], "tags": ["ensalada", "atún", "rápido", "sin cocción", "comida"], "calories_approx": 200, "vegetableHidden": false, "cookidooSearchTerms": ["ensalada atún"], "tip": "La ensalada más rápida de la dieta. Para días que no tienes NADA de tiempo."}, {"id": "ensalada_marisco", "name": "Ensalada de marisco templada", "category": "comida_completa", "mealTypes": ["comida"], "prepTime": 10, "cookTime": 15, "totalTime": 25, "servings": 2, "difficulty": "fácil", "thermomix": true, "ingredients": [{"item": "langostinos", "quantity": "200g"}, {"item": "pulpo cocido", "quantity": "100g"}, {"item": "huevo", "quantity": "1"}, {"item": "lechuga", "quantity": "1 cogollo"}, {"item": "tomate", "quantity": "1"}, {"item": "atún al natural", "quantity": "media lata"}, {"item": "aceitunas", "quantity": "6"}, {"item": "aceite de oliva", "quantity": "1 cucharada"}, {"item": "vinagre", "quantity": "al gusto"}], "thermomixSteps": ["Cocer langostinos y huevo juntos: 500ml agua en vaso, langostinos en Varoma, huevo en cestillo. 13 min/Varoma/vel 1.", "Pelar langostinos y huevo. Cortar en trozos.", "Montar la ensalada: lechuga, tomate, pulpo, langostinos, huevo, atún, aceitunas.", "Aliñar con aceite y vinagre."], "tags": ["ensalada", "marisco", "templada", "sábado", "especial", "completa"], "calories_approx": 280, "vegetableHidden": false, "cookidooSearchTerms": ["ensalada marisco", "salpicón marisco"], "tip": "Perfecta para sábados. El TM7 cuece el marisco y los huevos a la vez."}, {"id": "ensalada_pollo_esparragos", "name": "Ensalada templada de pollo y espárragos", "category": "comida_completa", "mealTypes": ["comida"], "prepTime": 10, "cookTime": 15, "totalTime": 25, "servings": 2, "difficulty": "fácil", "thermomix": true, "ingredients": [{"item": "pechuga de pollo", "quantity": "1"}, {"item": "espárragos trigueros", "quantity": "1 manojo"}, {"item": "lechuga variada", "quantity": "un puñado"}, {"item": "tomate cherry", "quantity": "6"}, {"item": "aceite de oliva", "quantity": "1 cucharada"}, {"item": "vinagre balsámico", "quantity": "un chorrito"}, {"item": "sal y pimienta", "quantity": "al gusto"}], "thermomixSteps": ["Trocear pollo. Echar con aceite en TM7. 5 min/160°C/vel ↺1 (modo dorado, sellar).", "Añadir espárragos cortados. 5 min/160°C/vel ↺1.", "Montar la ensalada con la lechuga y tomates cherry.", "Colocar el pollo y espárragos templados encima.", "Aliñar con aceite y vinagre balsámico."], "tags": ["ensalada", "templada", "pollo", "espárragos", "completa"], "calories_approx": 250, "vegetableHidden": false, "cookidooSearchTerms": ["ensalada templada pollo"], "tip": "La ensalada templada combina lo mejor: frescura de la lechuga y sabor del pollo dorado."}, {"id": "ensalada_salmon_pepino", "name": "Ensalada de salmón ahumado con pepino", "category": "cena", "mealTypes": ["cena"], "prepTime": 10, "cookTime": 0, "totalTime": 10, "servings": 1, "difficulty": "muy fácil", "thermomix": false, "ingredients": [{"item": "salmón ahumado", "quantity": "100g"}, {"item": "pepino", "quantity": "1"}, {"item": "tomate", "quantity": "1"}, {"item": "brotes tiernos", "quantity": "un puñado"}, {"item": "aceite de oliva", "quantity": "1 cucharada"}, {"item": "limón", "quantity": "medio"}, {"item": "eneldo (opcional)", "quantity": "al gusto"}], "thermomixSteps": ["No necesita Thermomix.", "Cortar pepino en rodajas finas. Trocear tomate.", "Montar con brotes, salmón ahumado encima.", "Aliñar con aceite, limón y eneldo."], "tags": ["ensalada", "salmón ahumado", "pepino", "cena", "sin cocción", "rápido"], "calories_approx": 230, "vegetableHidden": false, "cookidooSearchTerms": ["ensalada salmón"], "tip": "Cena de 10 minutos sin encender la TM7. Para días de cero ganas de cocinar."}, {"id": "ensalada_ilustrada", "name": "Ensalada ilustrada (atún, huevo, hojas verdes)", "category": "comida_completa", "mealTypes": ["comida"], "prepTime": 10, "cookTime": 13, "totalTime": 23, "servings": 1, "difficulty": "fácil", "thermomix": true, "ingredients": [{"item": "hojas verdes variadas", "quantity": "un puñado"}, {"item": "atún al natural (lata)", "quantity": "1"}, {"item": "huevo", "quantity": "1"}, {"item": "tomate", "quantity": "1"}, {"item": "pepino", "quantity": "medio"}, {"item": "aceitunas", "quantity": "4"}, {"item": "aceite de oliva", "quantity": "1 cucharada"}, {"item": "vinagre", "quantity": "al gusto"}], "thermomixSteps": ["Cocer huevo en TM7: 500ml agua, huevo en cestillo, 13 min/Varoma/vel 1.", "Pelar y trocear huevo.", "Montar ensalada con todos los ingredientes.", "Aliñar con aceite y vinagre."], "tags": ["ensalada", "ilustrada", "atún", "huevo", "completa"], "calories_approx": 220, "vegetableHidden": false, "cookidooSearchTerms": ["ensalada ilustrada", "ensalada completa"], "tip": "La ensalada ilustrada aparece mucho en la dieta original. Es un plato completo y saciante."}, {"id": "vinagreta_limon_hierbas", "name": "Vinagreta de limón y hierbas frescas", "category": "salsa", "mealTypes": ["comida", "cena"], "prepTime": 3, "cookTime": 0, "totalTime": 3, "servings": 8, "difficulty": "muy fácil", "thermomix": true, "ingredients": [{"item": "aceite de oliva", "quantity": "3 cucharadas"}, {"item": "zumo de limón", "quantity": "2 cucharadas"}, {"item": "mostaza Dijon", "quantity": "1 cucharadita"}, {"item": "perejil fresco", "quantity": "un puñado"}, {"item": "sal y pimienta", "quantity": "al gusto"}], "thermomixSteps": ["Echar todo en el vaso. 10 seg/vel 5.", "Guardar en bote de cristal en la nevera. Dura 1 semana."], "tags": ["vinagreta", "aliño", "limón", "hierbas", "básico"], "calories_approx": 40, "vegetableHidden": false, "cookidooSearchTerms": ["vinagreta limón", "aliño hierbas"], "tip": "Prepara un bote grande el domingo y tendrás aliño para toda la semana."}, {"id": "salsa_tomate_casera", "name": "Salsa de tomate casera (batch)", "category": "salsa", "mealTypes": ["comida", "cena"], "prepTime": 5, "cookTime": 25, "totalTime": 30, "servings": 8, "difficulty": "fácil", "thermomix": true, "ingredients": [{"item": "tomate triturado", "quantity": "800g (2 latas)"}, {"item": "cebolla", "quantity": "1"}, {"item": "ajo", "quantity": "2 dientes"}, {"item": "aceite de oliva", "quantity": "1 cucharada"}, {"item": "orégano", "quantity": "1 cucharadita"}, {"item": "sal y pimienta", "quantity": "al gusto"}], "thermomixSteps": ["Trocear cebolla y ajo. 5 seg/vel 5.", "Añadir aceite. 5 min/120°C/vel 1.", "Añadir tomate, orégano, sal y pimienta. 20 min/100°C/vel 1.", "Se puede triturar (vel 5-7) o dejar con trozos.", "Guardar en tuppers. Congela lo que no uses."], "tags": ["salsa", "tomate", "batch cooking", "base", "congelar"], "calories_approx": 35, "vegetableHidden": true, "cookidooSearchTerms": ["salsa tomate thermomix", "tomate frito casero"], "tip": "Haz cantidad para toda la semana o congela en porciones. Base para mil recetas."}, {"id": "aliño_mostaza_light", "name": "Aliño de mostaza ligero", "category": "salsa", "mealTypes": ["comida", "cena"], "prepTime": 2, "cookTime": 0, "totalTime": 2, "servings": 6, "difficulty": "muy fácil", "thermomix": true, "ingredients": [{"item": "mostaza Dijon", "quantity": "1 cucharada"}, {"item": "vinagre de manzana", "quantity": "1 cucharada"}, {"item": "aceite de oliva", "quantity": "2 cucharadas"}, {"item": "sal y pimienta", "quantity": "al gusto"}], "thermomixSteps": ["Todo al vaso. 10 seg/vel 5. Emulsiona perfectamente.", "Guardar en la nevera."], "tags": ["aliño", "mostaza", "light", "vinagreta", "rápido"], "calories_approx": 30, "vegetableHidden": false, "cookidooSearchTerms": ["vinagreta mostaza"], "tip": "La mostaza da mucho sabor sin apenas calorías. Ideal para ensaladas."}, {"id": "salsa_verde_perejil", "name": "Salsa verde de perejil y ajo", "category": "salsa", "mealTypes": ["comida", "cena"], "prepTime": 3, "cookTime": 0, "totalTime": 3, "servings": 6, "difficulty": "muy fácil", "thermomix": true, "ingredients": [{"item": "perejil fresco", "quantity": "un manojo grande"}, {"item": "ajo", "quantity": "1 diente"}, {"item": "aceite de oliva", "quantity": "3 cucharadas"}, {"item": "vinagre o limón", "quantity": "1 cucharada"}, {"item": "sal", "quantity": "al gusto"}], "thermomixSteps": ["Echar ajo y perejil. 10 seg/vel 7.", "Añadir aceite, vinagre y sal. 10 seg/vel 5.", "Perfecta para acompañar pescado al vapor."], "tags": ["salsa verde", "perejil", "ajo", "pescado", "acompañamiento"], "calories_approx": 45, "vegetableHidden": false, "cookidooSearchTerms": ["salsa verde perejil", "chimichurri"], "tip": "Esta salsa transforma cualquier pescado al vapor en un plato de restaurante."}, {"id": "sofrito_base_tm7", "name": "Sofrito base multiusos", "category": "salsa", "mealTypes": ["comida", "cena"], "prepTime": 5, "cookTime": 15, "totalTime": 20, "servings": 8, "difficulty": "fácil", "thermomix": true, "ingredients": [{"item": "cebolla", "quantity": "2"}, {"item": "pimiento rojo", "quantity": "1"}, {"item": "tomate maduro", "quantity": "2"}, {"item": "ajo", "quantity": "3 dientes"}, {"item": "aceite de oliva", "quantity": "2 cucharadas"}, {"item": "sal", "quantity": "al gusto"}], "thermomixSteps": ["Trocear todo. 5 seg/vel 5.", "Añadir aceite. 15 min/120°C/vel 1.", "Guardar en botes. Se congela perfectamente en porciones.", "Usar como base para guisos, carnes, pescados."], "tags": ["sofrito", "base", "batch cooking", "congelar", "multiusos"], "calories_approx": 50, "vegetableHidden": true, "cookidooSearchTerms": ["sofrito thermomix", "sofrito casero"], "tip": "Haz sofrito para toda la semana el domingo. Es la base de la cocina española y con TM7 se hace solo."}], "weeklyTemplates": [{"weekNumber": 1, "name": "Semana 1 - Iniciación", "days": {"lunes": {"desayuno": "Café con leche desnatada + tostada integral con aceite de oliva", "almuerzo": "1 manzana", "comida": {"primero": "crema_calabacin_curry", "segundo": "pollo_hierbas_varoma", "nota": "Se pueden hacer juntos en el Varoma: crema abajo, pollo arriba"}, "merienda": "1 naranja", "cena": {"receta": "merluza_varoma_limon", "acompañamiento": "calabacin_dorado_ajo"}}, "martes": {"desayuno": "Café con leche desnatada + tostada integral con jamón serrano", "almuerzo": "1 pieza de fruta", "comida": {"primero": "champinones_ajillo", "segundo": "solomillo_cerdo_pimientos"}, "merienda": "2 kiwis", "cena": {"receta": "tortilla_francesa_tm", "acompañamiento": "ensalada_salmon_pepino"}}, "miercoles": {"desayuno": "Café con leche desnatada + tostada integral con queso fresco", "almuerzo": "1 pera", "comida": {"receta": "menu_crema_verduras_merluza", "nota": "Menú completo Varoma"}, "merienda": "200g fresas", "cena": {"receta": "mejillones_vino", "acompañamiento": "esparragos_jamon"}}, "jueves": {"desayuno": "Café con leche desnatada + tostada integral con aceite y tomate", "almuerzo": "1 manzana", "comida": {"primero": "crema_esparragos_ajo", "segundo": "pollo_curry_ligero"}, "merienda": "1 melocotón", "cena": {"receta": "salmon_vapor_eneldo", "acompañamiento": "verduras_wok_asiatico"}}, "viernes": {"desayuno": "Café con leche desnatada + tostada integral con jamón cocido", "almuerzo": "1 pieza de fruta", "comida": {"primero": "crema_champinones_tomillo", "segundo": "lomo_cerdo_champinones"}, "merienda": "2 mandarinas", "cena": {"receta": "gambas_ajillo_tm7", "acompañamiento": "pimientos_caramelizados"}}, "sabado": {"desayuno": "Café con leche desnatada + tostada integral con mermelada sin azúcar", "almuerzo": "1 pieza de fruta", "comida": {"receta": "ensalada_marisco"}, "merienda": "200g melón", "cena": {"receta": "bacalao_tomate_confitado"}}, "domingo": {"desayuno": "Café con leche desnatada + tostada integral", "almuerzo": "1 pieza de fruta", "comida": "LIBRE (sin pan ni dulces)", "merienda": "1 pieza de fruta", "cena": "1 pieza de fruta mediana"}}}, {"weekNumber": 2, "name": "Semana 2 - Variedad", "days": {"lunes": {"desayuno": "Café con leche desnatada + tostada integral con aceite", "almuerzo": "1 pieza de fruta", "comida": {"receta": "menu_crema_brocoli_salmon", "nota": "Menú completo Varoma"}, "merienda": "1 pera", "cena": {"receta": "revuelto_setas_gambas"}}, "martes": {"desayuno": "Café con leche desnatada + tostada integral con queso fresco", "almuerzo": "1 manzana", "comida": {"primero": "crema_tomate_albahaca", "segundo": "entrecot_plancha_pimientos"}, "merienda": "3 albaricoques", "cena": {"receta": "langostinos_varoma", "acompañamiento": "calabacin_dorado_ajo"}}, "miercoles": {"desayuno": "Café con leche desnatada + tostada integral con jamón serrano", "almuerzo": "1 pieza de fruta", "comida": {"primero": "espinacas_pinones", "segundo": "albondigas_pavo_tomate"}, "merienda": "200g fresas", "cena": {"receta": "sepia_ajo_perejil", "acompañamiento": "brocoli_ajo_guindilla"}}, "jueves": {"desayuno": "Café con leche desnatada + tostada integral con aceite y tomate", "almuerzo": "1 pieza de fruta", "comida": {"receta": "menu_crema_champinones_pavo", "nota": "Menú completo Varoma"}, "merienda": "2 kiwis", "cena": {"receta": "merluza_varoma_limon", "acompañamiento": "esparragos_jamon"}}, "viernes": {"desayuno": "Café con leche desnatada + tostada integral con jamón cocido", "almuerzo": "1 pieza de fruta", "comida": {"primero": "crema_puerro_ligera", "segundo": "filete_ternera_setas"}, "merienda": "1 naranja", "cena": {"receta": "calamares_salsa_tomate"}}, "sabado": {"desayuno": "Café con leche desnatada + tostada integral", "almuerzo": "1 pieza de fruta", "comida": {"receta": "ensalada_pollo_esparragos"}, "merienda": "200g sandía", "cena": {"receta": "lubina_varoma_verduritas"}}, "domingo": {"desayuno": "Café con leche desnatada + tostada integral", "almuerzo": "1 pieza de fruta", "comida": "LIBRE (sin pan ni dulces)", "merienda": "1 pieza de fruta", "cena": "1 pieza de fruta mediana"}}}, {"weekNumber": 3, "name": "Semana 3 - Intensiva", "days": {"lunes": {"desayuno": "Café con leche desnatada + tostada integral con aceite", "almuerzo": "1 pieza de fruta", "comida": {"receta": "menu_sopa_verduras_solomillo", "nota": "Menú completo Varoma"}, "merienda": "1 manzana", "cena": {"receta": "salmon_vapor_eneldo", "acompañamiento": "champinones_ajillo"}}, "martes": {"desayuno": "Café con leche desnatada + tostada integral con jamón serrano", "almuerzo": "1 pieza de fruta", "comida": {"primero": "crema_calabaza_especiada", "segundo": "pollo_limon_tomillo"}, "merienda": "2 mandarinas", "cena": {"receta": "tortilla_francesa_tm", "acompañamiento": "verduras_wok_asiatico"}}, "miercoles": {"desayuno": "Café con leche desnatada + tostada integral con queso fresco", "almuerzo": "1 pieza de fruta", "comida": {"primero": "sopa_thai_verduras", "segundo": "hamburguesa_pollo_casera"}, "merienda": "200g fresas", "cena": {"receta": "mejillones_vino", "acompañamiento": "calabacin_dorado_ajo"}}, "jueves": {"desayuno": "Café con leche desnatada + tostada integral con aceite y tomate", "almuerzo": "1 pieza de fruta", "comida": {"receta": "menu_crema_calabacin_pollo", "nota": "Menú completo Varoma"}, "merienda": "1 pera", "cena": {"receta": "gambas_ajillo_tm7", "acompañamiento": "esparragos_jamon"}}, "viernes": {"desayuno": "Café con leche desnatada + tostada integral con jamón cocido", "almuerzo": "1 pieza de fruta", "comida": {"primero": "crema_coliflor_nuez", "segundo": "ternera_guisada_suave"}, "merienda": "2 kiwis", "cena": {"receta": "bacalao_tomate_confitado", "acompañamiento": "pimientos_caramelizados"}}, "sabado": {"desayuno": "Café con leche desnatada + tostada integral", "almuerzo": "1 pieza de fruta", "comida": {"receta": "ensalada_ilustrada"}, "merienda": "200g melón", "cena": {"receta": "lubina_varoma_verduritas"}}, "domingo": {"desayuno": "Café con leche desnatada + tostada integral", "almuerzo": "1 pieza de fruta", "comida": "LIBRE (sin pan ni dulces)", "merienda": "1 pieza de fruta", "cena": "1 pieza de fruta mediana"}}}, {"weekNumber": 4, "name": "Semana 4 - Consolidación", "days": {"lunes": {"desayuno": "Café con leche desnatada + tostada integral con aceite", "almuerzo": "1 pieza de fruta", "comida": {"primero": "crema_brocoli_pimenton", "segundo": "pollo_hierbas_varoma"}, "merienda": "1 naranja", "cena": {"receta": "sepia_ajo_perejil", "acompañamiento": "berenjena_comino"}}, "martes": {"desayuno": "Café con leche desnatada + tostada integral con jamón serrano", "almuerzo": "1 pieza de fruta", "comida": {"receta": "menu_crema_verduras_merluza", "nota": "Menú completo Varoma"}, "merienda": "2 kiwis", "cena": {"receta": "revuelto_setas_gambas"}}, "miercoles": {"desayuno": "Café con leche desnatada + tostada integral con queso fresco", "almuerzo": "1 pieza de fruta", "comida": {"primero": "crema_pimientos_asados", "segundo": "lomo_cerdo_champinones"}, "merienda": "200g fresas", "cena": {"receta": "langostinos_varoma", "acompañamiento": "espinacas_pinones"}}, "jueves": {"desayuno": "Café con leche desnatada + tostada integral con aceite y tomate", "almuerzo": "1 pieza de fruta", "comida": {"primero": "brocoli_ajo_guindilla", "segundo": "pollo_curry_ligero"}, "merienda": "1 melocotón", "cena": {"receta": "salmon_vapor_eneldo", "acompañamiento": "calabacin_dorado_ajo"}}, "viernes": {"desayuno": "Café con leche desnatada + tostada integral con jamón cocido", "almuerzo": "1 pieza de fruta", "comida": {"receta": "menu_crema_brocoli_salmon", "nota": "Menú completo Varoma"}, "merienda": "3 albaricoques", "cena": {"receta": "calamares_salsa_tomate", "acompañamiento": "pimientos_caramelizados"}}, "sabado": {"desayuno": "Café con leche desnatada + tostada integral", "almuerzo": "1 pieza de fruta", "comida": {"receta": "ensalada_marisco"}, "merienda": "200g sandía", "cena": {"receta": "merluza_varoma_limon", "acompañamiento": "verduras_wok_asiatico"}}, "domingo": {"desayuno": "Café con leche desnatada + tostada integral", "almuerzo": "1 pieza de fruta", "comida": "LIBRE (sin pan ni dulces)", "merienda": "1 pieza de fruta", "cena": "1 pieza de fruta mediana"}}}], "shoppingListCategories": {"proteinas": ["Pechuga de pollo", "Pechuga de pavo", "Solomillo de cerdo", "Lomo de cerdo", "Ternera filetes", "Merluza", "Salmón", "Lubina", "Bacalao", "Gambas", "Langostinos", "Mejillones", "Sepia", "Calamares", "Huevos", "Jamón serrano", "Atún al natural latas"], "verduras": ["Calabacín", "Brócoli", "Espárragos verdes", "Champiñones", "Setas", "Pimientos rojos", "Pimientos verdes", "Berenjena", "Calabaza", "Coliflor", "Espinacas", "Puerro", "Tomate", "Lechuga", "Pepino", "Cebolla"], "frutas": ["Naranjas", "Manzanas", "Peras", "Kiwis", "Fresas", "Plátanos", "Mandarinas"], "lacteos": ["Leche desnatada", "Queso fresco desnatado", "Queso para untar light"], "panaderia": ["Pan integral de molde o barra"], "condimentos": ["Aceite de oliva virgen extra", "Vinagre", "Limones", "Sal", "Pimienta negra", "Pimentón ahumado (La Chinata)", "Curry en polvo", "Comino", "Nuez moscada", "Tomillo seco", "Hierbas provenzales", "Orégano", "Albahaca seca", "Jengibre fresco/polvo", "Ajo", "Guindilla", "Salsa de soja (poca cantidad)", "Mostaza Dijon"]}};</script>
+<script type="text/babel">
+const { useState, useEffect, useMemo, useCallback } = React;
+
+// ==================== UTILITY FUNCTIONS ====================
+const dayNames = ['domingo','lunes','martes','miercoles','jueves','viernes','sabado'];
+const dayLabels = ['Dom','Lun','Mar','Mie','Jue','Vie','Sab'];
+const dayFull = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+
+function getTodayIndex() { return new Date().getDay(); }
+function getTodayName() { return dayNames[getTodayIndex()]; }
+
+function getRecipeById(id) {
+  return DB.recipes.find(r => r.id === id);
+}
+
+function getCookidooUrl(terms) {
+  if (!terms || terms.length === 0) return null;
+  return `https://cookidoo.es/search/es-ES?query=${encodeURIComponent(terms[0])}&context=recipes`;
+}
+
+const catEmoji = {
+  'comida_primero': '🥣', 'comida_segundo': '🥩', 'cena': '🐟',
+  'menu_completo': '⭐', 'comida_completa': '🥗', 'salsa': '🫙', 'base': '🥚'
+};
+
+const mealColors = {
+  desayuno: '#f59e0b', almuerzo: '#8b5cf6', comida: '#059669',
+  merienda: '#ec4899', cena: '#3b82f6'
+};
+
+const mealEmoji = {
+  desayuno: '☀️', almuerzo: '🍎', comida: '🍽️', merienda: '🍊', cena: '🌙'
+};
+
+const difficultyColor = {
+  'muy fácil': 'bg-green-100 text-green-800',
+  'fácil': 'bg-blue-100 text-blue-800',
+  'media': 'bg-yellow-100 text-yellow-800'
+};
+
+// ==================== COMPONENTS ====================
+
+function App() {
+  const [tab, setTab] = useState('inicio');
+  const [selectedWeek, setSelectedWeek] = useState(0);
+  const [selectedRecipe, setSelectedRecipe] = useState(null);
+  const [searchText, setSearchText] = useState('');
+  const [filterCat, setFilterCat] = useState('all');
+  const [excludedFoods, setExcludedFoods] = useState([]);
+  const [shoppingChecked, setShoppingChecked] = useState({});
+  const [selectedDay, setSelectedDay] = useState(getTodayName());
+
+  const showRecipe = useCallback((id) => {
+    const r = getRecipeById(id);
+    if (r) { setSelectedRecipe(r); setTab('receta_detail'); }
+  }, []);
+
+  if (tab === 'receta_detail' && selectedRecipe) {
+    return <RecipeDetail recipe={selectedRecipe} onBack={() => setTab('recetas')} />;
+  }
+
+  return (
+    <div className="min-h-screen pb-20">
+      <header className="bg-gradient-to-r from-green-600 to-emerald-700 text-white p-4 shadow-lg sticky top-0 z-50">
+        <div className="max-w-lg mx-auto flex items-center justify-between">
+          <div>
+            <h1 className="text-lg font-bold">Mi Dieta TM7</h1>
+            <p className="text-xs text-green-200">Cronobiología + Thermomix</p>
+          </div>
+          <div className="text-2xl">🍳</div>
+        </div>
+      </header>
+
+      <main className="max-w-lg mx-auto p-4 fade-in">
+        {tab === 'inicio' && <HomeTab onShowRecipe={showRecipe} selectedWeek={selectedWeek} />}
+        {tab === 'plan' && <PlanTab selectedWeek={selectedWeek} setSelectedWeek={setSelectedWeek} selectedDay={selectedDay} setSelectedDay={setSelectedDay} onShowRecipe={showRecipe} />}
+        {tab === 'recetas' && <RecipesTab searchText={searchText} setSearchText={setSearchText} filterCat={filterCat} setFilterCat={setFilterCat} onShowRecipe={showRecipe} excludedFoods={excludedFoods} />}
+        {tab === 'compra' && <ShoppingTab selectedWeek={selectedWeek} setSelectedWeek={setSelectedWeek} checked={shoppingChecked} setChecked={setShoppingChecked} />}
+        {tab === 'reglas' && <RulesTab />}
+      </main>
+
+      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-50">
+        <div className="max-w-lg mx-auto flex justify-around">
+          {[
+            ['inicio', '🏠', 'Inicio'],
+            ['plan', '📅', 'Plan'],
+            ['recetas', '📖', 'Recetas'],
+            ['compra', '🛒', 'Compra'],
+            ['reglas', '📋', 'Reglas']
+          ].map(([id, icon, label]) => (
+            <button key={id} onClick={() => setTab(id)}
+              className={`flex flex-col items-center py-2 px-3 text-xs ${tab === id ? 'tab-active' : 'tab-inactive'}`}>
+              <span className="text-xl">{icon}</span>
+              <span>{label}</span>
+            </button>
+          ))}
+        </div>
+      </nav>
+    </div>
+  );
+}
+
+// ==================== HOME TAB ====================
+function HomeTab({ onShowRecipe, selectedWeek }) {
+  const today = getTodayName();
+  const todayFull = dayFull[getTodayIndex()];
+  const week = DB.weeklyTemplates[selectedWeek];
+  const todayPlan = week?.days[today];
+
+  return (
+    <div className="space-y-4">
+      <div className="bg-white rounded-2xl shadow-md p-5">
+        <div className="flex items-center justify-between mb-3">
+          <div>
+            <h2 className="text-xl font-bold text-gray-800">Hola! 💪</h2>
+            <p className="text-sm text-gray-500">{todayFull}, {new Date().toLocaleDateString('es-ES', {day: 'numeric', month: 'long'})}</p>
+          </div>
+          <div className="bg-emerald-100 rounded-xl p-3 text-center">
+            <div className="text-2xl font-bold text-emerald-700">98</div>
+            <div className="text-xs text-emerald-600">kg</div>
+          </div>
+        </div>
+        <div className="grid grid-cols-3 gap-2 mt-3">
+          <div className="bg-blue-50 rounded-lg p-2 text-center">
+            <div className="text-lg font-bold text-blue-700">52</div>
+            <div className="text-xs text-blue-500">años</div>
+          </div>
+          <div className="bg-purple-50 rounded-lg p-2 text-center">
+            <div className="text-lg font-bold text-purple-700">55</div>
+            <div className="text-xs text-purple-500">recetas</div>
+          </div>
+          <div className="bg-orange-50 rounded-lg p-2 text-center">
+            <div className="text-lg font-bold text-orange-700">24</div>
+            <div className="text-xs text-orange-500">min/media</div>
+          </div>
+        </div>
+      </div>
+
+      <div className="bg-gradient-to-r from-emerald-500 to-green-600 rounded-2xl shadow-md p-4 text-white">
+        <p className="text-sm font-medium">Recuerda: las verduras en cremas con especias son otro mundo. Nada de verduras cocidas sosas. 🌶️</p>
+      </div>
+
+      {todayPlan && today !== 'domingo' ? (
+        <div className="space-y-2">
+          <h3 className="font-bold text-gray-700 text-lg">Hoy comes:</h3>
+          <MealCard meal="desayuno" data={todayPlan.desayuno} onShowRecipe={onShowRecipe} />
+          <MealCard meal="almuerzo" data={todayPlan.almuerzo} onShowRecipe={onShowRecipe} />
+          <MealCard meal="comida" data={todayPlan.comida} onShowRecipe={onShowRecipe} />
+          <MealCard meal="merienda" data={todayPlan.merienda} onShowRecipe={onShowRecipe} />
+          <MealCard meal="cena" data={todayPlan.cena} onShowRecipe={onShowRecipe} />
+        </div>
+      ) : (
+        <div className="bg-white rounded-2xl shadow-md p-5 text-center">
+          <div className="text-4xl mb-2">🎉</div>
+          <h3 className="font-bold text-lg">Domingo: Comida Libre</h3>
+          <p className="text-sm text-gray-500">Sin pan ni dulces. Disfruta.</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function MealCard({ meal, data, onShowRecipe }) {
+  if (!data) return null;
+  const color = mealColors[meal];
+  const emoji = mealEmoji[meal];
+  const label = meal.charAt(0).toUpperCase() + meal.slice(1);
+
+  let content = null;
+  let recipeIds = [];
+
+  if (typeof data === 'string') {
+    content = <p className="text-sm text-gray-700">{data}</p>;
+  } else if (data.receta) {
+    const r = getRecipeById(data.receta);
+    if (r) {
+      recipeIds.push(r.id);
+      content = (
+        <div>
+          <button onClick={() => onShowRecipe(r.id)} className="text-sm font-medium text-emerald-700 hover:underline text-left">
+            {r.name} <span className="text-xs text-gray-400">({r.totalTime} min)</span>
+          </button>
+          {data.acompañamiento && (() => {
+            const a = getRecipeById(data.acompañamiento);
+            return a ? <button onClick={() => onShowRecipe(a.id)} className="block text-xs text-blue-600 hover:underline mt-1">+ {a.name}</button> : null;
+          })()}
+          {data.nota && <p className="text-xs text-amber-600 mt-1">💡 {data.nota}</p>}
+        </div>
+      );
+    }
+  } else if (data.primero || data.segundo) {
+    content = (
+      <div>
+        {data.primero && (() => {
+          const r = getRecipeById(data.primero);
+          return r ? <button onClick={() => onShowRecipe(r.id)} className="text-sm font-medium text-emerald-700 hover:underline block text-left">1º {r.name} <span className="text-xs text-gray-400">({r.totalTime} min)</span></button> : <p className="text-sm text-gray-600">1º {data.primero}</p>;
+        })()}
+        {data.segundo && (() => {
+          const r = getRecipeById(data.segundo);
+          return r ? <button onClick={() => onShowRecipe(r.id)} className="text-sm font-medium text-emerald-700 hover:underline block text-left mt-1">2º {r.name} <span className="text-xs text-gray-400">({r.totalTime} min)</span></button> : <p className="text-sm text-gray-600 mt-1">2º {data.segundo}</p>;
+        })()}
+        {data.nota && <p className="text-xs text-amber-600 mt-1">💡 {data.nota}</p>}
+      </div>
+    );
+  }
+
+  return (
+    <div className="bg-white rounded-xl shadow-sm p-3 meal-card" style={{borderLeftColor: color}}>
+      <div className="flex items-start gap-2">
+        <span className="text-lg">{emoji}</span>
+        <div className="flex-1">
+          <div className="text-xs font-bold uppercase tracking-wide" style={{color}}>{label}</div>
+          {content}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ==================== PLAN TAB ====================
+function PlanTab({ selectedWeek, setSelectedWeek, selectedDay, setSelectedDay, onShowRecipe }) {
+  const week = DB.weeklyTemplates[selectedWeek];
+  const todayName = getTodayName();
+  const plan = week?.days[selectedDay];
+
+  return (
+    <div className="space-y-4">
+      <div className="flex gap-2 overflow-x-auto no-scrollbar pb-2">
+        {DB.weeklyTemplates.map((w, i) => (
+          <button key={i} onClick={() => setSelectedWeek(i)}
+            className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap ${selectedWeek === i ? 'bg-emerald-600 text-white' : 'bg-white text-gray-600 shadow-sm'}`}>
+            S{w.weekNumber}
+          </button>
+        ))}
+      </div>
+
+      <h3 className="font-bold text-gray-700">{week?.name}</h3>
+
+      <div className="grid grid-cols-7 gap-1">
+        {['lunes','martes','miercoles','jueves','viernes','sabado','domingo'].map((d, i) => (
+          <button key={d} onClick={() => setSelectedDay(d)}
+            className={`py-2 rounded-lg text-xs font-medium text-center
+              ${selectedDay === d ? 'bg-emerald-600 text-white' : d === todayName ? 'bg-emerald-100 text-emerald-700' : 'bg-white text-gray-600'}`}>
+            {['L','M','X','J','V','S','D'][i]}
+          </button>
+        ))}
+      </div>
+
+      {plan && (
+        <div className="space-y-2 fade-in">
+          <h4 className="font-bold text-gray-800 capitalize">{selectedDay === 'miercoles' ? 'Miércoles' : selectedDay === 'sabado' ? 'Sábado' : selectedDay.charAt(0).toUpperCase() + selectedDay.slice(1)}</h4>
+          <MealCard meal="desayuno" data={plan.desayuno} onShowRecipe={onShowRecipe} />
+          <MealCard meal="almuerzo" data={plan.almuerzo} onShowRecipe={onShowRecipe} />
+          <MealCard meal="comida" data={plan.comida} onShowRecipe={onShowRecipe} />
+          <MealCard meal="merienda" data={plan.merienda} onShowRecipe={onShowRecipe} />
+          <MealCard meal="cena" data={plan.cena} onShowRecipe={onShowRecipe} />
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ==================== RECIPES TAB ====================
+function RecipesTab({ searchText, setSearchText, filterCat, setFilterCat, onShowRecipe, excludedFoods }) {
+  const categories = [
+    ['all', 'Todas'],
+    ['comida_primero', '🥣 Cremas/Verduras'],
+    ['comida_segundo', '🥩 Proteína Comida'],
+    ['cena', '🐟 Cena'],
+    ['menu_completo', '⭐ Menú Completo'],
+    ['comida_completa', '🥗 Ensaladas'],
+    ['salsa', '🫙 Salsas']
+  ];
+
+  const filtered = useMemo(() => {
+    return DB.recipes.filter(r => {
+      if (filterCat !== 'all' && r.category !== filterCat) return false;
+      if (searchText) {
+        const s = searchText.toLowerCase();
+        return r.name.toLowerCase().includes(s) || r.tags.some(t => t.includes(s));
+      }
+      return true;
+    });
+  }, [searchText, filterCat]);
+
+  return (
+    <div className="space-y-3">
+      <input type="text" value={searchText} onChange={e => setSearchText(e.target.value)}
+        placeholder="Buscar receta..." className="w-full p-3 rounded-xl border border-gray-200 bg-white shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400" />
+
+      <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
+        {categories.map(([id, label]) => (
+          <button key={id} onClick={() => setFilterCat(id)}
+            className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap ${filterCat === id ? 'bg-emerald-600 text-white' : 'bg-white text-gray-600 shadow-sm'}`}>
+            {label}
+          </button>
+        ))}
+      </div>
+
+      <p className="text-xs text-gray-400">{filtered.length} recetas</p>
+
+      <div className="space-y-2">
+        {filtered.map(r => (
+          <button key={r.id} onClick={() => onShowRecipe(r.id)}
+            className="w-full text-left bg-white rounded-xl shadow-sm p-4 recipe-card">
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-1">
+                  <span>{catEmoji[r.category] || '🍴'}</span>
+                  <h4 className="font-bold text-sm text-gray-800">{r.name}</h4>
+                </div>
+                <div className="flex flex-wrap gap-1 mt-1">
+                  <span className={`badge ${difficultyColor[r.difficulty] || 'bg-gray-100 text-gray-600'}`}>{r.difficulty}</span>
+                  <span className="badge bg-gray-100 text-gray-600">⏱ {r.totalTime} min</span>
+                  <span className="badge bg-gray-100 text-gray-600">🔥 {r.calories_approx} kcal</span>
+                  {r.vegetableHidden && <span className="badge bg-green-100 text-green-700">🥦 Verdura escondida</span>}
+                  {r.category === 'menu_completo' && <span className="badge bg-amber-100 text-amber-700">⭐ 2 platos en 1</span>}
+                </div>
+              </div>
+              <span className="text-gray-300 text-lg ml-2">›</span>
+            </div>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ==================== RECIPE DETAIL ====================
+function RecipeDetail({ recipe: r, onBack }) {
+  const cookidooUrl = getCookidooUrl(r.cookidooSearchTerms);
+
+  return (
+    <div className="min-h-screen pb-6">
+      <header className="bg-gradient-to-r from-green-600 to-emerald-700 text-white p-4 shadow-lg sticky top-0 z-50">
+        <div className="max-w-lg mx-auto flex items-center gap-3">
+          <button onClick={onBack} className="text-2xl">←</button>
+          <div>
+            <h1 className="text-base font-bold">{r.name}</h1>
+            <p className="text-xs text-green-200">{r.category === 'menu_completo' ? '⭐ Menú completo (2 platos)' : r.category.replace('_', ' ')}</p>
+          </div>
+        </div>
+      </header>
+
+      <div className="max-w-lg mx-auto p-4 space-y-4 fade-in">
+        <div className="flex gap-2 flex-wrap">
+          <span className={`badge ${difficultyColor[r.difficulty]}`}>{r.difficulty}</span>
+          <span className="badge bg-blue-100 text-blue-700">⏱ {r.totalTime} min</span>
+          <span className="badge bg-orange-100 text-orange-700">🔥 {r.calories_approx} kcal</span>
+          <span className="badge bg-purple-100 text-purple-700">👤 {r.servings} raciones</span>
+          {r.vegetableHidden && <span className="badge bg-green-100 text-green-700">🥦 Verdura escondida</span>}
+          {r.thermomix && <span className="badge bg-gray-800 text-white">TM7</span>}
+        </div>
+
+        {r.tip && (
+          <div className="bg-amber-50 border-l-4 border-amber-400 p-3 rounded-r-lg">
+            <p className="text-sm text-amber-800">💡 {r.tip}</p>
+          </div>
+        )}
+
+        <div className="bg-white rounded-xl shadow-sm p-4">
+          <h3 className="font-bold text-gray-800 mb-3">🧾 Ingredientes</h3>
+          <ul className="space-y-1.5">
+            {r.ingredients.map((ing, i) => (
+              <li key={i} className="flex items-center gap-2 text-sm">
+                <span className="w-2 h-2 bg-emerald-400 rounded-full flex-shrink-0"></span>
+                <span className="text-gray-700"><strong>{ing.item}</strong> — {ing.quantity}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <div className="bg-white rounded-xl shadow-sm p-4">
+          <h3 className="font-bold text-gray-800 mb-3">👨‍🍳 Preparación en TM7</h3>
+          <ol className="space-y-3">
+            {r.thermomixSteps.map((step, i) => (
+              <li key={i} className="flex gap-3 text-sm">
+                <span className="bg-emerald-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold flex-shrink-0">{i+1}</span>
+                <span className="text-gray-700 leading-relaxed">{step}</span>
+              </li>
+            ))}
+          </ol>
+        </div>
+
+        <div className="flex gap-2">
+          {cookidooUrl && (
+            <a href={cookidooUrl} target="_blank" rel="noopener noreferrer"
+              className="flex-1 bg-emerald-600 text-white text-center py-3 rounded-xl font-medium text-sm shadow-md">
+              🔍 Buscar en Cookidoo
+            </a>
+          )}
+          <button onClick={onBack} className="flex-1 bg-gray-200 text-gray-700 text-center py-3 rounded-xl font-medium text-sm">
+            ← Volver
+          </button>
+        </div>
+
+        {r.tags && (
+          <div className="flex flex-wrap gap-1">
+            {r.tags.map((tag, i) => (
+              <span key={i} className="text-xs bg-gray-100 text-gray-500 px-2 py-1 rounded-full">#{tag}</span>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ==================== SHOPPING TAB ====================
+function ShoppingTab({ selectedWeek, setSelectedWeek, checked, setChecked }) {
+  const week = DB.weeklyTemplates[selectedWeek];
+
+  const shoppingList = useMemo(() => {
+    const items = {};
+    if (!week) return {};
+
+    Object.values(week.days).forEach(day => {
+      if (typeof day === 'string') return;
+      ['comida', 'cena'].forEach(meal => {
+        const m = day[meal];
+        if (!m || typeof m === 'string') return;
+
+        const recipeIds = [];
+        if (m.receta) recipeIds.push(m.receta);
+        if (m.primero) recipeIds.push(m.primero);
+        if (m.segundo) recipeIds.push(m.segundo);
+        if (m.acompañamiento) recipeIds.push(m.acompañamiento);
+
+        recipeIds.forEach(id => {
+          const r = getRecipeById(id);
+          if (r) {
+            r.ingredients.forEach(ing => {
+              const key = ing.item.toLowerCase();
+              if (!items[key]) items[key] = { name: ing.item, quantities: [] };
+              items[key].quantities.push(ing.quantity);
+            });
+          }
+        });
+      });
+    });
+
+    // Categorize
+    const cats = { 'Proteínas 🥩': [], 'Verduras 🥬': [], 'Frutas 🍎': [], 'Condimentos 🧂': [], 'Otros 📦': [] };
+    const proteinWords = ['pollo','pavo','ternera','cerdo','solomillo','lomo','entrecot','merluza','salmón','lubina','bacalao','gambas','langostinos','mejillones','sepia','calamares','huevo','atún','pulpo','jamón','carne'];
+    const vegWords = ['calabacín','brócoli','espárrago','champiñón','seta','pimiento','berenjena','calabaza','coliflor','espinaca','puerro','tomate','lechuga','pepino','cebolla','ajo','alcachofa','judía','borraja','acelga','cogollo','endivia'];
+    const condWords = ['aceite','vinagre','limón','sal','pimienta','pimentón','curry','comino','nuez moscada','tomillo','hierbas','orégano','albahaca','jengibre','guindilla','soja','mostaza','perejil','eneldo','laurel'];
+
+    Object.values(items).forEach(item => {
+      const n = item.name.toLowerCase();
+      if (proteinWords.some(w => n.includes(w))) cats['Proteínas 🥩'].push(item);
+      else if (vegWords.some(w => n.includes(w))) cats['Verduras 🥬'].push(item);
+      else if (condWords.some(w => n.includes(w))) cats['Condimentos 🧂'].push(item);
+      else cats['Otros 📦'].push(item);
+    });
+
+    return cats;
+  }, [selectedWeek]);
+
+  const toggleCheck = (name) => {
+    setChecked(prev => ({ ...prev, [name]: !prev[name] }));
+  };
+
+  const totalItems = Object.values(shoppingList).flat().length;
+  const checkedCount = Object.values(checked).filter(Boolean).length;
+
+  return (
+    <div className="space-y-4">
+      <div className="flex gap-2 overflow-x-auto no-scrollbar pb-2">
+        {DB.weeklyTemplates.map((w, i) => (
+          <button key={i} onClick={() => { setSelectedWeek(i); setChecked({}); }}
+            className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap ${selectedWeek === i ? 'bg-emerald-600 text-white' : 'bg-white text-gray-600 shadow-sm'}`}>
+            Semana {w.weekNumber}
+          </button>
+        ))}
+      </div>
+
+      <div className="bg-white rounded-xl shadow-sm p-3">
+        <div className="flex justify-between items-center">
+          <span className="text-sm text-gray-600">Progreso</span>
+          <span className="text-sm font-bold text-emerald-700">{checkedCount}/{totalItems}</span>
+        </div>
+        <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
+          <div className="bg-emerald-500 h-2 rounded-full transition-all" style={{width: `${totalItems ? (checkedCount/totalItems*100) : 0}%`}}></div>
+        </div>
+      </div>
+
+      {Object.entries(shoppingList).map(([cat, items]) => items.length > 0 && (
+        <div key={cat} className="bg-white rounded-xl shadow-sm p-4">
+          <h3 className="font-bold text-gray-800 mb-2">{cat}</h3>
+          <div className="space-y-2">
+            {items.map((item, i) => (
+              <label key={i} className="flex items-center gap-3 cursor-pointer">
+                <input type="checkbox" checked={!!checked[item.name]} onChange={() => toggleCheck(item.name)}
+                  className="w-5 h-5 text-emerald-600 rounded" />
+                <span className={`text-sm ${checked[item.name] ? 'line-through text-gray-400' : 'text-gray-700'}`}>
+                  {item.name} <span className="text-xs text-gray-400">({item.quantities.join(', ')})</span>
+                </span>
+              </label>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ==================== RULES TAB ====================
+function RulesTab() {
+  const meals = DB.dietRules.meals;
+
+  return (
+    <div className="space-y-4">
+      <div className="bg-white rounded-2xl shadow-md p-5">
+        <h2 className="font-bold text-lg text-gray-800 mb-2">📐 Cronobiología Nutricional</h2>
+        <p className="text-sm text-gray-600 leading-relaxed">{DB.dietRules.principle}</p>
+      </div>
+
+      <h3 className="font-bold text-gray-700">Distribución del día:</h3>
+
+      {Object.entries(meals).map(([key, meal]) => (
+        <div key={key} className="bg-white rounded-xl shadow-sm p-4 meal-card" style={{borderLeftColor: mealColors[key]}}>
+          <div className="flex items-center gap-2 mb-2">
+            <span className="text-lg">{mealEmoji[key]}</span>
+            <div>
+              <h4 className="font-bold text-sm capitalize" style={{color: mealColors[key]}}>{key}</h4>
+              <span className="text-xs text-gray-400">{meal.timeRange}</span>
+            </div>
+          </div>
+          <p className="text-sm text-gray-600 leading-relaxed">{meal.rules}</p>
+          {meal.thermomixTip && <p className="text-xs text-emerald-600 mt-2 bg-emerald-50 p-2 rounded-lg">🍳 {meal.thermomixTip}</p>}
+        </div>
+      ))}
+
+      <div className="bg-red-50 rounded-xl p-4">
+        <h3 className="font-bold text-red-700 mb-2">🚫 Prohibidos</h3>
+        <div className="flex flex-wrap gap-1">
+          {DB.dietRules.prohibited.map((p, i) => (
+            <span key={i} className="badge bg-red-100 text-red-700">{p}</span>
+          ))}
+        </div>
+      </div>
+
+      <div className="bg-blue-50 rounded-xl p-4">
+        <h3 className="font-bold text-blue-700 mb-2">💧 Extras</h3>
+        <p className="text-sm text-blue-600">Aceite: {DB.dietRules.oilLimit}</p>
+        <p className="text-sm text-blue-600 mt-1">Agua: {DB.dietRules.waterIntake}</p>
+        {DB.dietRules.alcoholLimit && <p className="text-sm text-blue-600 mt-1">Alcohol: {DB.dietRules.alcoholLimit}</p>}
+      </div>
+
+      <div className="bg-gradient-to-r from-emerald-500 to-green-600 rounded-2xl p-4 text-white">
+        <h3 className="font-bold mb-1">💡 Truco maestro TM7</h3>
+        <p className="text-sm">Haz la crema de verduras en el vaso mientras la proteína se cocina al vapor en el Varoma. Dos platos en 30 min con una sola máquina.</p>
+      </div>
+    </div>
+  );
+}
+
+// ==================== RENDER ====================
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>
