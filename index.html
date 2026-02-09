@@ -665,9 +665,9 @@ function ChefIA({excluded, setExcluded}) {
   const doRandom = () => {
     const seed = Date.now();
     const mi = Math.floor(mulberry32(seed) * CHEF_METHODS.length);
-    const vi = Math.floor(rng(seed + 1) * CHEF_VEGS.length);
-    const pi = Math.floor(rng(seed + 2) * CHEF_PROTS.length);
-    const fi = Math.floor(rng(seed + 3) * CHEF_FLAVORS.length);
+    const vi = Math.floor(mulberry32(seed + 1) * CHEF_VEGS.length);
+    const pi = Math.floor(mulberry32(seed + 2) * CHEF_PROTS.length);
+    const fi = Math.floor(mulberry32(seed + 3) * CHEF_FLAVORS.length);
     const m = CHEF_METHODS[mi].id;
     setMethod(m); setVegIdx(vi); setProtIdx(pi); setFlavIdx(fi);
     const r = buildRecipe(m, vi, pi, fi);
@@ -677,7 +677,7 @@ function ChefIA({excluded, setExcluded}) {
   const doRemix = () => {
     const seed = Date.now();
     const vi = Math.floor(mulberry32(seed) * CHEF_VEGS.length);
-    const fi = Math.floor(rng(seed + 1) * CHEF_FLAVORS.length);
+    const fi = Math.floor(mulberry32(seed + 1) * CHEF_FLAVORS.length);
     setVegIdx(vi); setFlavIdx(fi);
     const r = buildRecipe(method, vi, protIdx, fi);
     setGenerated(r);
